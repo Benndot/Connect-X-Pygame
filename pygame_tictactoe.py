@@ -637,22 +637,36 @@ def pre_game_rules(flip_status):
 # ----------------------------------------------------------------------------------------------------------------------
 # Connect X Gameplay
 
+class GridCell:
+    def __init__(self, size: tuple[float, float], coords: tuple[float, float], value: str, cell_id: int):
+        self.size = size
+        self.coords = coords
+        self.value = value
+        self.cell_id = cell_id
+
+
 class GridManager:
     grid_sequence = []
     selected_squares = []
 
+    def __init__(self, grid: list[list[GridCell]], activated_cells: list[GridCell]):
+        self.grid = grid
+        self.activated_cells = activated_cells
 
-def generate_and_blit_grid():
-    y_multi_factor = 0.1  # Vertical Spacing
-    for _ in range(Game.current_mode.board.shape[0]):
-        x_multi_factor = 0.15  # Horizontal spacing
-        for _ in range(Game.current_mode.board.shape[1]):
-            cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
-            if cell:
-                print(f"coords: ({cell[0]}, {cell[1]})")
-                GridManager.selected_squares.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
-            x_multi_factor += 0.1
-        y_multi_factor += 0.15
+    def generate_and_blit_grid(self):
+        y_multi_factor = 0.1  # Vertical Spacing
+        for _ in range(Game.current_mode.board.shape[0]):
+            x_multi_factor = 0.15  # Horizontal spacing
+            for _ in range(Game.current_mode.board.shape[1]):
+                cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
+                if cell:
+                    print(f"coords: ({cell[0]}, {cell[1]})")
+                    self.selected_squares.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
+                x_multi_factor += 0.1
+            y_multi_factor += 0.15
+
+
+grid_manager = GridManager([], [])
 
 
 def generate_cell(x_multi_factor, y_multi_factor):
@@ -705,7 +719,7 @@ def connect_game():
         if options_button:
             options_menu()
 
-        generate_and_blit_grid()
+        grid_manager.generate_and_blit_grid()
 
         for cell in GridManager.selected_squares:
             create_onscreen_text(large_font, black, Game.player_symbol, cell.get("coords")[0] + (cell.get("size")[0]/3),
