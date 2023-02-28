@@ -646,24 +646,31 @@ class GridCell:
 
 
 class GridManager:
-    grid_sequence = []
-    selected_squares = []
 
-    def __init__(self, grid: list[list[GridCell]], activated_cells: list[GridCell]):
+    def __init__(self, grid: list[list[GridCell]], activated_cells: list):
         self.grid = grid
         self.activated_cells = activated_cells
 
     def generate_and_blit_grid(self):
+        # id_counter = 0
+        grid: list[list] = []
         y_multi_factor = 0.1  # Vertical Spacing
         for _ in range(Game.current_mode.board.shape[0]):
             x_multi_factor = 0.15  # Horizontal spacing
+            grid_row: list = []  # The rows of the overall grid
             for _ in range(Game.current_mode.board.shape[1]):
                 cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
+                grid_row.append(cell)
                 if cell:
                     print(f"coords: ({cell[0]}, {cell[1]})")
-                    self.selected_squares.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
+                    self.activated_cells.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
                 x_multi_factor += 0.1
+            grid.append(grid_row)
             y_multi_factor += 0.15
+        if not self.grid:
+            print("Game grid is currently empty. Populating...")
+            self.grid = grid
+            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
 
 grid_manager = GridManager([], [])
@@ -721,7 +728,7 @@ def connect_game():
 
         grid_manager.generate_and_blit_grid()
 
-        for cell in GridManager.selected_squares:
+        for cell in grid_manager.activated_cells:
             create_onscreen_text(large_font, black, Game.player_symbol, cell.get("coords")[0] + (cell.get("size")[0]/3),
                                  cell.get("coords")[1] + (cell.get("size")[1]/6))
 
