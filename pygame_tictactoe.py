@@ -36,7 +36,7 @@ def var_save_value(file, key_name, fallback):
             return fallback
 
 
-def object_save_value(file, obj):
+def obtain_save_value(file, obj):
     # Determines via the persistent data saved to shelve file what a given Stat object's saved value is
 
     # Maybe we could save custom game modes using this?
@@ -241,8 +241,8 @@ class Game:
     board = current_mode.board  # The board of the active game format
     player_symbol: str = var_save_value(save_file, "player_symbol", "X")
     enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
-    session_counter = 0
-    priority = True
+    session_counter: int = 0
+    priority: bool = True
 
 
 active_game = connect4  # The active game format in use
@@ -279,15 +279,15 @@ enemy_move_list: list = []  # A list that will contain the sequence of all the m
 
 print("Initializing save data... ")
 
-wins.value = object_save_value(save_file, wins)
-losses.value = object_save_value(save_file, losses)
-ties.value = object_save_value(save_file, ties)
+wins.value = obtain_save_value(save_file, wins)
+losses.value = obtain_save_value(save_file, losses)
+ties.value = obtain_save_value(save_file, ties)
 
-ReplayManager.r1 = object_save_value(save_file, ReplayManager.r1)
-ReplayManager.r2 = object_save_value(save_file, ReplayManager.r2)
-ReplayManager.r3 = object_save_value(save_file, ReplayManager.r3)
-ReplayManager.r4 = object_save_value(save_file, ReplayManager.r4)
-ReplayManager.r5 = object_save_value(save_file, ReplayManager.r5)
+ReplayManager.r1 = obtain_save_value(save_file, ReplayManager.r1)
+ReplayManager.r2 = obtain_save_value(save_file, ReplayManager.r2)
+ReplayManager.r3 = obtain_save_value(save_file, ReplayManager.r3)
+ReplayManager.r4 = obtain_save_value(save_file, ReplayManager.r4)
+ReplayManager.r5 = obtain_save_value(save_file, ReplayManager.r5)
 
 # Initialize list after save data is potentially retrieved
 replay_list: list = [ReplayManager.r1, ReplayManager.r2, ReplayManager.r3, ReplayManager.r4, ReplayManager.r5]
@@ -296,17 +296,9 @@ player_symbol: str = var_save_value(save_file, "player_symbol", "X")
 enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
 
 # Initialize the user-made custom mode, if it exists in the save file
-custom_mode = object_save_value(save_file, custom_mode)
+custom_mode = obtain_save_value(save_file, custom_mode)
 
 # When game mode win counters start being tracked, their "shelve" name will be obj.name.strip() (to remove spaces)
-
-# ----------------------------------------------------------------------------------------------------------------------
-# 7. Menu, game mode selection (and creation), and board display functions
-
-
-def display_board(game_board) -> None:
-    [print(index, row) for index, row in enumerate(game_board)]
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 8. Menu, game mode selection (and creation), and board display functions
@@ -505,6 +497,7 @@ def coin_flip():
             result_text = "flipping..." if number_of_iterations < 3 else f"The result is... {coin_flip_result}!"
             create_onscreen_text(medium_font, white, result_text, game_screen.width * 0.62, game_screen.height / 2)
             win_loss_insert = "won" if player_call == coin_flip_result else "lost"
+            Game.priority = True if win_loss_insert == "won" else False
             win_loss_text = "" if number_of_iterations < 4 else f"You have {win_loss_insert} the coin toss!"
             create_onscreen_text(medium_font, white, win_loss_text, game_screen.width * 0.62, game_screen.height / 1.5)
             if number_of_iterations > 5:
@@ -595,124 +588,6 @@ def pre_game_rules(flip_status):
         clock.tick(8)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Connect X Gameplay
-
-class GridCell:
-    def __init__(self, size: tuple[float, float], coords: tuple[float, float], value: str, cell_id: int):
-        self.size = size
-        self.coords = coords
-        self.value = value
-        self.cell_id = cell_id
-
-
-class GridManager:
-
-    def __init__(self, grid: list[list[GridCell]], activated_cells: list):
-        self.grid = grid
-        self.activated_cells = activated_cells
-
-    def generate_and_blit_grid(self):
-        # id_counter = 0
-        grid: list[list] = []
-        y_multi_factor = 0.1  # Vertical Spacing
-        for _ in range(Game.current_mode.board.shape[0]):
-            x_multi_factor = 0.15  # Horizontal spacing
-            grid_row: list = []  # The rows of the overall grid
-            for _ in range(Game.current_mode.board.shape[1]):
-                cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
-                grid_row.append(cell)
-                if cell:
-                    print(f"coords: ({cell[0]}, {cell[1]})")
-                    self.activated_cells.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
-                x_multi_factor += 0.1
-            grid.append(grid_row)
-            y_multi_factor += 0.15
-        if not self.grid:
-            print("Game grid is currently empty. Populating...")
-            self.grid = grid
-            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
-
-
-grid_manager = GridManager([], [])
-
-
-def generate_cell(x_multi_factor, y_multi_factor):
-    mouse = pygame.mouse.get_pos()
-    x = game_screen.width * x_multi_factor
-    y = game_screen.height * y_multi_factor
-    width = game_screen.width / 10
-    height = game_screen.height / 7
-    slot_rect = pygame.Rect(x, y, width, height)
-    if x + width > mouse[0] > x and y + height > mouse[1] > y:
-        pygame.draw.rect(game_screen.screen, white, slot_rect, int(game_screen.height / 360))
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.MOUSEBUTTONUP:
-                return x, y, width, height
-    else:
-        pygame.draw.rect(game_screen.screen, black, slot_rect, int(game_screen.height / 360))
-
-
-def connect_game():
-
-    player_turn = False
-
-    while True:
-
-        game_screen.screen.fill(thistle_green)
-
-        create_onscreen_text(intermediate_font, black, "Player Turn" if player_turn else "CPU Turn",
-                             game_screen.width / 2.5, game_screen.height * 0.01)
-
-        # Establishing the user inputs for text and indexes and the border boxes that will surround them
-
-        index_search_y = game_screen.height * .33
-        text_search_y = game_screen.height * .60
-
-        # pygame.Rect (x, y, width, height)
-        rect1 = pygame.Rect(game_screen.width / 2, index_search_y, game_screen.width / 12,
-                            game_screen.height / 6)
-        rect2 = pygame.Rect(game_screen.width / 2, text_search_y, game_screen.height / 12,
-                            game_screen.height / 10)
-
-        music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
-                                          game_screen.height * 0.90, blackish, black, False)
-
-        if music_toggle:
-            music_object.music_toggle()
-
-        options_button = create_text_button(sml_med_font, white, "Options Menu", game_screen.width * .85, 0,
-                                            (0, 200, 0), green, False)
-
-        if options_button:
-            options_menu()
-
-        grid_manager.generate_and_blit_grid()
-
-        for cell in grid_manager.activated_cells:
-            create_onscreen_text(large_font, black, Game.player_symbol, cell.get("coords")[0] + (cell.get("size")[0]/3),
-                                 cell.get("coords")[1] + (cell.get("size")[1]/6))
-
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if evnt.type == pygame.MOUSEBUTTONDOWN:
-                if rect1.collidepoint(evnt.pos):
-                    pass
-                if rect2.collidepoint(evnt.pos):
-                    pass
-
-            if evnt.type == pygame.KEYDOWN:
-                pass
-
-        pygame.display.update()
-        clock.tick(15)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
 def options_menu():
 
     title_text = large_font.render("Options Menu", True, blackish)
@@ -781,6 +656,122 @@ def options_menu():
 
         pygame.display.update()
         clock.tick(15)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Connect X Gameplay
+
+class GridCell:
+    def __init__(self, size: tuple[float, float], coords: tuple[float, float], value: str, cell_id: int):
+        self.size = size
+        self.coords = coords
+        self.value = value
+        self.cell_id = cell_id
+
+
+class GridManager:
+
+    def __init__(self, grid: list[list[GridCell]], activated_cells: list):
+        self.grid = grid
+        self.activated_cells = activated_cells
+
+    def generate_and_blit_grid(self):
+        # id_counter = 0
+        grid: list[list] = []
+        y_multi_factor = 0.1  # Vertical Spacing
+        for _ in range(Game.current_mode.board.shape[0]):
+            x_multi_factor = 0.15  # Horizontal spacing
+            grid_row: list = []  # The rows of the overall grid
+            for _ in range(Game.current_mode.board.shape[1]):
+                cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
+                grid_row.append(cell)
+                if cell:
+                    print(f"coords: ({cell[0]}, {cell[1]})")
+                    self.activated_cells.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
+                x_multi_factor += 0.1
+            grid.append(grid_row)
+            y_multi_factor += 0.15
+        if not self.grid:
+            print("Game grid is currently empty. Populating...")
+            self.grid = grid
+            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
+
+
+grid_manager = GridManager([], [])
+
+
+def generate_cell(x_multi_factor, y_multi_factor):
+    mouse = pygame.mouse.get_pos()
+    x = game_screen.width * x_multi_factor
+    y = game_screen.height * y_multi_factor
+    width = game_screen.width / 10
+    height = game_screen.height / 7
+    slot_rect = pygame.Rect(x, y, width, height)
+    if x + width > mouse[0] > x and y + height > mouse[1] > y:
+        pygame.draw.rect(game_screen.screen, white, slot_rect, int(game_screen.height / 360))
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.MOUSEBUTTONUP:
+                return x, y, width, height
+    else:
+        pygame.draw.rect(game_screen.screen, black, slot_rect, int(game_screen.height / 360))
+
+
+def connect_game():
+
+    while True:
+
+        game_screen.screen.fill(thistle_green)
+
+        create_onscreen_text(intermediate_font, black, "Player Turn" if Game.priority else "CPU Turn",
+                             game_screen.width / 2.5, game_screen.height * 0.01)
+
+        # Establishing the user inputs for text and indexes and the border boxes that will surround them
+
+        index_search_y = game_screen.height * .33
+        text_search_y = game_screen.height * .60
+
+        # pygame.Rect (x, y, width, height)
+        rect1 = pygame.Rect(game_screen.width / 2, index_search_y, game_screen.width / 12,
+                            game_screen.height / 6)
+        rect2 = pygame.Rect(game_screen.width / 2, text_search_y, game_screen.height / 12,
+                            game_screen.height / 10)
+
+        music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
+                                          game_screen.height * 0.90, blackish, black, False)
+
+        if music_toggle:
+            music_object.music_toggle()
+
+        options_button = create_text_button(sml_med_font, white, "Options Menu", game_screen.width * .85, 0,
+                                            (0, 200, 0), green, False)
+
+        if options_button:
+            options_menu()
+
+        grid_manager.generate_and_blit_grid()
+
+        for cell in grid_manager.activated_cells:
+            create_onscreen_text(large_font, black, Game.player_symbol, cell.get("coords")[0] + (cell.get("size")[0]/3),
+                                 cell.get("coords")[1] + (cell.get("size")[1]/6))
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evnt.type == pygame.MOUSEBUTTONDOWN:
+                if rect1.collidepoint(evnt.pos):
+                    pass
+                if rect2.collidepoint(evnt.pos):
+                    pass
+
+            if evnt.type == pygame.KEYDOWN:
+                pass
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 def main():
