@@ -714,7 +714,8 @@ class GridManager:
                         {
                             "coords": (cell_pos_and_size[0], cell_pos_and_size[1]),
                             "size": (cell_pos_and_size[2], cell_pos_and_size[3])
-                        })
+                        }
+                    )
                 x_offset_factor += 0.1
             grid.append(grid_row)
             y_offset_factor += 0.15
@@ -724,20 +725,21 @@ class GridManager:
             self.grid = grid
             print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
-    def generate_grid(self):
+    def generate_grid(self):  # Not implemented, should only need to be called once at the game's beginning
         grid: list[list] = []
         y_offset_factor = 0.1  # Vertical Spacing
         for row in range(GameHandler.current_mode.board.shape[0]):
+
             x_offset_factor = 0.15  # Horizontal spacing
-            grid_row: list = []  # The rows of the overall grid
+            grid_row: list = []  # The rows of the overall grid that will be inserted
+
             for col in range(GameHandler.current_mode.board.shape[1]):
 
                 cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
                 print(f"Current cell_id: {cell.cell_id}")
-
-                if cell:
-                    pass
+                grid_row.append(cell)
                 x_offset_factor += 0.1
+
             grid.append(grid_row)
             y_offset_factor += 0.15
 
@@ -746,15 +748,15 @@ class GridManager:
             self.grid = grid
             print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
-    def blit_grid(self):
+    def blit_grid(self):  # Not implemented
         if not self.grid:
             print("The game grid does not exist, something went wrong")
         for row in self.grid:
             for cell in row:
+                # Blit cell here
                 if cell.value:
                     print(f"cell id {cell.cell_id} has a value of {cell.value}")
-        for cell in self.filled_cells:
-            pass
+                    # Draw cell value here
 
 
 grid_manager = GridManager([], [])
@@ -763,6 +765,8 @@ grid_manager = GridManager([], [])
 def connect_game():
 
     GameHandler.player_turn = True if GameHandler.priority else False
+
+    # GridManager.generate_grid() will be called here right before the game starts
 
     while True:
 
@@ -785,7 +789,7 @@ def connect_game():
 
         grid_manager.generate_and_blit_grid()
 
-        for cell in grid_manager.filled_cells:
+        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the Gridmanager class
             create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
                                  (cell.get("size")[0] / 3),
                                  cell.get("coords")[1] + (cell.get("size")[1]/6))
