@@ -231,14 +231,12 @@ class GameHandler:
     enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
     session_counter: int = 0
     priority: bool = True
+    player_turn = True
 
 
 active_game = connect4  # The active game format in use
 
-board = active_game.board  # The board of the active game format
-
 objective = active_game.objective  # The objective of the active game format
-
 
 # Determines whether the game is active and certain functions should continue
 game_is_active: bool = True
@@ -703,11 +701,13 @@ def generate_cell(x_multi_factor, y_multi_factor):
 
 def connect_game():
 
+    GameHandler.player_turn = True if GameHandler.priority else False
+
     while True:
 
         game_screen.screen.fill(thistle_green)
 
-        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.priority else "CPU Turn",
+        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.player_turn else "CPU Turn",
                              game_screen.width / 2.5, game_screen.height * 0.01)
 
         music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
