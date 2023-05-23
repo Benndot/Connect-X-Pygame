@@ -275,9 +275,6 @@ ReplayManager.r5 = obtain_save_value(save_file, ReplayManager.r5)
 # Initialize list after save data is potentially retrieved
 replay_list: list = [ReplayManager.r1, ReplayManager.r2, ReplayManager.r3, ReplayManager.r4, ReplayManager.r5]
 
-player_symbol: str = var_save_value(save_file, "player_symbol", "X")
-enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
-
 # Initialize the user-made custom mode, if it exists in the save file
 custom_mode = obtain_save_value(save_file, custom_mode)
 
@@ -645,10 +642,10 @@ def options_menu():
 # Connect X Gameplay
 
 class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
-    def __init__(self, cell_id: tuple[int, int], value: str, pos_factors: tuple[float, float]):
+    def __init__(self, cell_id: tuple[int, int], pos_factors: tuple[float, float]):
         self.cell_id = cell_id
-        self.value = value
         self.position_factors = pos_factors
+        self.value = ""
         self.width = game_screen.width / 10
         self.height = game_screen.height / 7
 
@@ -665,6 +662,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
+                    self.value = GameHandler.player_symbol
                     return x, y, self.width, self.height
         else:  # Non-hover
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
@@ -705,7 +703,7 @@ class GridManager:
             grid_row: list = []  # The rows of the overall grid
             for col in range(GameHandler.current_mode.board.shape[1]):
 
-                cell = GridCell((row, col), GameHandler.player_symbol, (x_offset_factor, y_offset_factor))
+                cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
                 print(f"Current cell_id: {cell.cell_id}")
                 cell_pos_and_size = generate_cell_on_board(x_offset_factor, y_offset_factor)  # Creates the square
                 grid_row.append(cell_pos_and_size)
@@ -720,10 +718,43 @@ class GridManager:
                 x_offset_factor += 0.1
             grid.append(grid_row)
             y_offset_factor += 0.15
+
         if not self.grid:
             print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
             print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
+
+    def generate_grid(self):
+        grid: list[list] = []
+        y_offset_factor = 0.1  # Vertical Spacing
+        for row in range(GameHandler.current_mode.board.shape[0]):
+            x_offset_factor = 0.15  # Horizontal spacing
+            grid_row: list = []  # The rows of the overall grid
+            for col in range(GameHandler.current_mode.board.shape[1]):
+
+                cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
+                print(f"Current cell_id: {cell.cell_id}")
+
+                if cell:
+                    pass
+                x_offset_factor += 0.1
+            grid.append(grid_row)
+            y_offset_factor += 0.15
+
+        if not self.grid:
+            print("GameHandler grid is currently empty. Populating...")
+            self.grid = grid
+            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
+
+    def blit_grid(self):
+        if not self.grid:
+            print("The game grid does not exist, something went wrong")
+        for row in self.grid:
+            for cell in row:
+                if cell.value:
+                    print(f"cell id {cell.cell_id} has a value of {cell.value}")
+        for cell in self.filled_cells:
+            pass
 
 
 grid_manager = GridManager([], [])
