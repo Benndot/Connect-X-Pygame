@@ -236,7 +236,7 @@ class ReplayManager:
 # 5. DEFINING GLOBAL VARIABLES
 
 
-class Game:
+class GameHandler:
     current_mode = connect4
     board = current_mode.board  # The board of the active game format
     player_symbol: str = var_save_value(save_file, "player_symbol", "X")
@@ -254,9 +254,6 @@ objective = active_game.objective  # The objective of the active game format
 
 # Determines whether the game is active and certain functions should continue
 game_is_active: bool = True
-
-# Decides whether player goes first or not
-go_first: bool = True
 
 # Variable controlling whether to ask if the rules should be explained
 rule_toggle: bool = True
@@ -359,15 +356,15 @@ def title_screen():
 
 def main_menu_game():
 
-    greeting_message = "Welcome to Benndot's Connect X game!" if Game.session_counter == 0 else \
+    greeting_message = "Welcome to Benndot's Connect X game!" if GameHandler.session_counter == 0 else \
         "Welcome back to Benndot's Connect X game!"
 
-    play_game_str = {"Play Game": mode_selection}
+    play_game_str = {"Play GameHandler": mode_selection}
     change_symbol_str = {"Change Symbol": mode_selection}
     stats_replays_str = {"Stats and Replays": mode_selection}
     audio_options = {"Audio Options": options_menu}
     save_options_str = {"Save File Options": options_menu}
-    quit_game_str = {"Quit Game": sys.exit}
+    quit_game_str = {"Quit GameHandler": sys.exit}
 
     menu_options = [play_game_str, change_symbol_str, stats_replays_str, audio_options, save_options_str, quit_game_str]
 
@@ -497,7 +494,7 @@ def coin_flip():
             result_text = "flipping..." if number_of_iterations < 3 else f"The result is... {coin_flip_result}!"
             create_onscreen_text(medium_font, white, result_text, game_screen.width * 0.62, game_screen.height / 2)
             win_loss_insert = "won" if player_call == coin_flip_result else "lost"
-            Game.priority = True if win_loss_insert == "won" else False
+            GameHandler.priority = True if win_loss_insert == "won" else False
             win_loss_text = "" if number_of_iterations < 4 else f"You have {win_loss_insert} the coin toss!"
             create_onscreen_text(medium_font, white, win_loss_text, game_screen.width * 0.62, game_screen.height / 1.5)
             if number_of_iterations > 5:
@@ -522,11 +519,11 @@ def pre_game_rules(flip_status):
 
     pre_game_message = f"{winner} won the coin toss and will be going first!"
 
-    game_rules = f"{Game.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
-                 f"{Game.current_mode.board.shape[0]} by {Game.current_mode.board.shape[1]} board. The goal of the " \
-                 f"game is to align {Game.current_mode.objective} of your characters in a row anywhere on the board " \
-                 f"before your opponent does. If the board fills up before either player accomplishes this objective" \
-                 f", the game ends in a tie."
+    game_rules = f"{GameHandler.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
+                 f"{GameHandler.current_mode.board.shape[0]} by {GameHandler.current_mode.board.shape[1]} board. " \
+                 f"The goal of the game is to align {GameHandler.current_mode.objective} of your characters in a row " \
+                 f"anywhere on the board before your opponent does. If the board fills up before either player " \
+                 f"accomplishes this objective, the game ends in a tie."
 
     while True:
         game_screen.screen.fill((90, 110, 150))
@@ -573,7 +570,7 @@ def pre_game_rules(flip_status):
                                          entry_x, game_screen.height * 0.4 * height_offset)
                     break
 
-        proceed_button = create_text_button(large_font, black, "Proceed To The Game", game_screen.width/2,
+        proceed_button = create_text_button(large_font, black, "Proceed To The GameHandler", game_screen.width/2,
                                             game_screen.height*0.8, (0, 0, 255), (0, 0, 180), True)
 
         if proceed_button:
@@ -679,10 +676,10 @@ class GridManager:
         # id_counter = 0
         grid: list[list] = []
         y_multi_factor = 0.1  # Vertical Spacing
-        for _ in range(Game.current_mode.board.shape[0]):
+        for _ in range(GameHandler.current_mode.board.shape[0]):
             x_multi_factor = 0.15  # Horizontal spacing
             grid_row: list = []  # The rows of the overall grid
-            for _ in range(Game.current_mode.board.shape[1]):
+            for _ in range(GameHandler.current_mode.board.shape[1]):
                 cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
                 grid_row.append(cell)
                 if cell:
@@ -692,7 +689,7 @@ class GridManager:
             grid.append(grid_row)
             y_multi_factor += 0.15
         if not self.grid:
-            print("Game grid is currently empty. Populating...")
+            print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
             print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
@@ -722,7 +719,7 @@ def connect_game():
 
         game_screen.screen.fill(thistle_green)
 
-        create_onscreen_text(intermediate_font, black, "Player Turn" if Game.priority else "CPU Turn",
+        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.priority else "CPU Turn",
                              game_screen.width / 2.5, game_screen.height * 0.01)
 
         # Establishing the user inputs for text and indexes and the border boxes that will surround them
@@ -751,7 +748,8 @@ def connect_game():
         grid_manager.generate_and_blit_grid()
 
         for cell in grid_manager.activated_cells:
-            create_onscreen_text(large_font, black, Game.player_symbol, cell.get("coords")[0] + (cell.get("size")[0]/3),
+            create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
+                                 (cell.get("size")[0] / 3),
                                  cell.get("coords")[1] + (cell.get("size")[1]/6))
 
         for evnt in pygame.event.get():
