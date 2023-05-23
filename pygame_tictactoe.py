@@ -665,10 +665,8 @@ def connect_game():
 
         grid_manager.generate_and_blit_grid()
 
-        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the Gridmanager class
-            create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
-                                 (cell.get("size")[0] / 3),
-                                 cell.get("coords")[1] + (cell.get("size")[1]/6))
+        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the GridManager class
+            cell.draw_cell_value()
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -694,6 +692,8 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
         self.value = ""
         self.width = game_screen.width / 10
         self.height = game_screen.height / 7
+        self.x = None
+        self.y = None
 
     def generate_cell_on_board(self):
 
@@ -701,6 +701,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
         x = game_screen.width * self.position_factors[0]
         y = game_screen.height * self.position_factors[1]
+        self.x, self.y = x, y
 
         outline_rect = pygame.Rect(x, y, self.width, self.height)
 
@@ -712,6 +713,10 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
                     return x, y, self.width, self.height
         else:  # Non-hover
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
+
+    def draw_cell_value(self):
+        create_onscreen_text(large_font, black, GameHandler.player_symbol, self.x + (self.width / 3),
+                             self.y + (self.height / 6))
 
 
 class GridManager:
@@ -729,18 +734,12 @@ class GridManager:
             for col in range(GameHandler.current_mode.board.shape[1]):
 
                 cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
-                print(f"Current cell_id: {cell.cell_id}")
                 physical_cell = cell.generate_cell_on_board()
                 grid_row.append(cell)
 
                 if physical_cell:
                     print(f"coords: ({physical_cell[0]}, {physical_cell[1]})")
-                    self.filled_cells.append(
-                        {
-                            "coords": (physical_cell[0], physical_cell[1]),
-                            "size": (physical_cell[2], physical_cell[3])
-                        }
-                    )
+                    self.filled_cells.append(cell)
                 x_offset_factor += 0.1
             grid.append(grid_row)
             y_offset_factor += 0.15
@@ -748,7 +747,6 @@ class GridManager:
         if not self.grid:
             print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
-            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
     def generate_grid(self):  # Not implemented, should only need to be called once at the game's beginning
         grid: list[list] = []
@@ -781,7 +779,7 @@ class GridManager:
                 # Blit cell here
                 if cell.value:
                     print(f"cell id {cell.cell_id} has a value of {cell.value}")
-                    # Draw cell value here
+                    cell.draw_cell_value()
 
 
 grid_manager = GridManager([], [])
