@@ -652,6 +652,27 @@ class GridCell:
         self.cell_id = cell_id
 
 
+def generate_cell_on_board(x_multi_factor, y_multi_factor):
+
+    mouse = pygame.mouse.get_pos()
+
+    x = game_screen.width * x_multi_factor
+    y = game_screen.height * y_multi_factor
+
+    width = game_screen.width / 10
+    height = game_screen.height / 7
+
+    outline_rect = pygame.Rect(x, y, width, height)
+
+    if x + width > mouse[0] > x and y + height > mouse[1] > y:  # Hover
+        pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
+                return x, y, width, height
+    else:  # Non-hover
+        pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
+
+
 class GridManager:
 
     def __init__(self, grid: list[list[GridCell]], activated_cells: list):
@@ -661,19 +682,19 @@ class GridManager:
     def generate_and_blit_grid(self):
         # id_counter = 0
         grid: list[list] = []
-        y_multi_factor = 0.1  # Vertical Spacing
+        y_offset_factor = 0.1  # Vertical Spacing
         for _ in range(GameHandler.current_mode.board.shape[0]):
-            x_multi_factor = 0.15  # Horizontal spacing
+            x_offset_factor = 0.15  # Horizontal spacing
             grid_row: list = []  # The rows of the overall grid
             for _ in range(GameHandler.current_mode.board.shape[1]):
-                cell = generate_cell(x_multi_factor, y_multi_factor)  # Creates the square
+                cell = generate_cell_on_board(x_offset_factor, y_offset_factor)  # Creates the square
                 grid_row.append(cell)
                 if cell:
                     print(f"coords: ({cell[0]}, {cell[1]})")
                     self.activated_cells.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
-                x_multi_factor += 0.1
+                x_offset_factor += 0.1
             grid.append(grid_row)
-            y_multi_factor += 0.15
+            y_offset_factor += 0.15
         if not self.grid:
             print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
@@ -681,22 +702,6 @@ class GridManager:
 
 
 grid_manager = GridManager([], [])
-
-
-def generate_cell(x_multi_factor, y_multi_factor):
-    mouse = pygame.mouse.get_pos()
-    x = game_screen.width * x_multi_factor
-    y = game_screen.height * y_multi_factor
-    width = game_screen.width / 10
-    height = game_screen.height / 7
-    slot_rect = pygame.Rect(x, y, width, height)
-    if x + width > mouse[0] > x and y + height > mouse[1] > y:
-        pygame.draw.rect(game_screen.screen, white, slot_rect, int(game_screen.height / 360))
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.MOUSEBUTTONUP:
-                return x, y, width, height
-    else:
-        pygame.draw.rect(game_screen.screen, black, slot_rect, int(game_screen.height / 360))
 
 
 def connect_game():
