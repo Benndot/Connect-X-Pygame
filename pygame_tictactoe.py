@@ -644,12 +644,30 @@ def options_menu():
 # ----------------------------------------------------------------------------------------------------------------------
 # Connect X Gameplay
 
-class GridCell:
-    def __init__(self, size: tuple[float, float], coords: tuple[float, float], value: str, cell_id: int):
-        self.size = size
-        self.coords = coords
-        self.value = value
+class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
+    def __init__(self, cell_id: tuple[int, int], value: str, pos_factors: tuple[float, float]):
         self.cell_id = cell_id
+        self.value = value
+        self.position_factors = pos_factors
+        self.width = game_screen.width / 10
+        self.height = game_screen.height / 7
+
+    def generate_cell_on_board(self):
+
+        mouse = pygame.mouse.get_pos()
+
+        x = game_screen.width * self.position_factors[0]
+        y = game_screen.height * self.position_factors[1]
+
+        outline_rect = pygame.Rect(x, y, self.width, self.height)
+
+        if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y:  # Hover
+            pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
+            for evnt in pygame.event.get():
+                if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
+                    return x, y, self.width, self.height
+        else:  # Non-hover
+            pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
 
 def generate_cell_on_board(x_multi_factor, y_multi_factor):
@@ -675,23 +693,30 @@ def generate_cell_on_board(x_multi_factor, y_multi_factor):
 
 class GridManager:
 
-    def __init__(self, grid: list[list[GridCell]], activated_cells: list):
+    def __init__(self, grid: list[list[GridCell]], filled_cells: list):
         self.grid = grid
-        self.activated_cells = activated_cells
+        self.filled_cells = filled_cells  # Cells with a value
 
     def generate_and_blit_grid(self):
-        # id_counter = 0
         grid: list[list] = []
         y_offset_factor = 0.1  # Vertical Spacing
-        for _ in range(GameHandler.current_mode.board.shape[0]):
+        for row in range(GameHandler.current_mode.board.shape[0]):
             x_offset_factor = 0.15  # Horizontal spacing
             grid_row: list = []  # The rows of the overall grid
-            for _ in range(GameHandler.current_mode.board.shape[1]):
-                cell = generate_cell_on_board(x_offset_factor, y_offset_factor)  # Creates the square
-                grid_row.append(cell)
-                if cell:
-                    print(f"coords: ({cell[0]}, {cell[1]})")
-                    self.activated_cells.append({"coords": (cell[0], cell[1]), "size": (cell[2], cell[3])})
+            for col in range(GameHandler.current_mode.board.shape[1]):
+
+                cell = GridCell((row, col), GameHandler.player_symbol, (x_offset_factor, y_offset_factor))
+                print(f"Current cell_id: {cell.cell_id}")
+                cell_pos_and_size = generate_cell_on_board(x_offset_factor, y_offset_factor)  # Creates the square
+                grid_row.append(cell_pos_and_size)
+
+                if cell_pos_and_size:
+                    print(f"coords: ({cell_pos_and_size[0]}, {cell_pos_and_size[1]})")
+                    self.filled_cells.append(
+                        {
+                            "coords": (cell_pos_and_size[0], cell_pos_and_size[1]),
+                            "size": (cell_pos_and_size[2], cell_pos_and_size[3])
+                        })
                 x_offset_factor += 0.1
             grid.append(grid_row)
             y_offset_factor += 0.15
@@ -729,7 +754,7 @@ def connect_game():
 
         grid_manager.generate_and_blit_grid()
 
-        for cell in grid_manager.activated_cells:
+        for cell in grid_manager.filled_cells:
             create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
                                  (cell.get("size")[0] / 3),
                                  cell.get("coords")[1] + (cell.get("size")[1]/6))
