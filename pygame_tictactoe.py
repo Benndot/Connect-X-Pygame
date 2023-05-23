@@ -307,7 +307,7 @@ def title_screen():
                                           0.02, green, lighter_green, True)
 
         if start_button:
-            main_menu_game()
+            main_menu()
 
         options_button = create_text_button(medium_font, black, "Options", game_screen.width * .8,
                                             game_screen.height * 0.02, (200, 200, 0), (120, 120, 0), True)
@@ -337,7 +337,7 @@ def title_screen():
         clock.tick(15)
 
 
-def main_menu_game():
+def main_menu():
 
     greeting_message = "Welcome to Benndot's Connect X game!" if GameHandler.session_counter == 0 else \
         "Welcome back to Benndot's Connect X game!"
@@ -638,8 +638,54 @@ def options_menu():
         clock.tick(15)
 
 
+def connect_game():
+
+    GameHandler.player_turn = True if GameHandler.priority else False
+
+    # GridManager.generate_grid() will be called here right before the game starts
+
+    while True:
+
+        game_screen.screen.fill(thistle_green)
+
+        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.player_turn else "CPU Turn",
+                             game_screen.width / 2.5, game_screen.height * 0.01)
+
+        music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
+                                          game_screen.height * 0.90, blackish, black, False)
+
+        if music_toggle:
+            music_object.music_toggle()
+
+        options_button = create_text_button(sml_med_font, white, "Options Menu", game_screen.width * .85, 0,
+                                            (0, 200, 0), green, False)
+
+        if options_button:
+            options_menu()
+
+        grid_manager.generate_and_blit_grid()
+
+        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the Gridmanager class
+            create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
+                                 (cell.get("size")[0] / 3),
+                                 cell.get("coords")[1] + (cell.get("size")[1]/6))
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evnt.type == pygame.MOUSEBUTTONDOWN:
+                pass
+
+            if evnt.type == pygame.KEYDOWN:
+                pass
+
+        pygame.display.update()
+        clock.tick(15)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
-# Connect X Gameplay
+# Connect X Gameplay Logic
 
 class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
     def __init__(self, cell_id: tuple[int, int], pos_factors: tuple[float, float]):
@@ -668,27 +714,6 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
 
-def generate_cell_on_board(x_multi_factor, y_multi_factor):
-
-    mouse = pygame.mouse.get_pos()
-
-    x = game_screen.width * x_multi_factor
-    y = game_screen.height * y_multi_factor
-
-    width = game_screen.width / 10
-    height = game_screen.height / 7
-
-    outline_rect = pygame.Rect(x, y, width, height)
-
-    if x + width > mouse[0] > x and y + height > mouse[1] > y:  # Hover
-        pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
-                return x, y, width, height
-    else:  # Non-hover
-        pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
-
-
 class GridManager:
 
     def __init__(self, grid: list[list[GridCell]], filled_cells: list):
@@ -705,15 +730,15 @@ class GridManager:
 
                 cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
                 print(f"Current cell_id: {cell.cell_id}")
-                cell_pos_and_size = generate_cell_on_board(x_offset_factor, y_offset_factor)  # Creates the square
-                grid_row.append(cell_pos_and_size)
+                physical_cell = cell.generate_cell_on_board()
+                grid_row.append(cell)
 
-                if cell_pos_and_size:
-                    print(f"coords: ({cell_pos_and_size[0]}, {cell_pos_and_size[1]})")
+                if physical_cell:
+                    print(f"coords: ({physical_cell[0]}, {physical_cell[1]})")
                     self.filled_cells.append(
                         {
-                            "coords": (cell_pos_and_size[0], cell_pos_and_size[1]),
-                            "size": (cell_pos_and_size[2], cell_pos_and_size[3])
+                            "coords": (physical_cell[0], physical_cell[1]),
+                            "size": (physical_cell[2], physical_cell[3])
                         }
                     )
                 x_offset_factor += 0.1
@@ -760,52 +785,6 @@ class GridManager:
 
 
 grid_manager = GridManager([], [])
-
-
-def connect_game():
-
-    GameHandler.player_turn = True if GameHandler.priority else False
-
-    # GridManager.generate_grid() will be called here right before the game starts
-
-    while True:
-
-        game_screen.screen.fill(thistle_green)
-
-        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.player_turn else "CPU Turn",
-                             game_screen.width / 2.5, game_screen.height * 0.01)
-
-        music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
-                                          game_screen.height * 0.90, blackish, black, False)
-
-        if music_toggle:
-            music_object.music_toggle()
-
-        options_button = create_text_button(sml_med_font, white, "Options Menu", game_screen.width * .85, 0,
-                                            (0, 200, 0), green, False)
-
-        if options_button:
-            options_menu()
-
-        grid_manager.generate_and_blit_grid()
-
-        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the Gridmanager class
-            create_onscreen_text(large_font, black, GameHandler.player_symbol, cell.get("coords")[0] +
-                                 (cell.get("size")[0] / 3),
-                                 cell.get("coords")[1] + (cell.get("size")[1]/6))
-
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if evnt.type == pygame.MOUSEBUTTONDOWN:
-                pass
-
-            if evnt.type == pygame.KEYDOWN:
-                pass
-
-        pygame.display.update()
-        clock.tick(15)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
