@@ -65,18 +65,6 @@ def obtain_save_value(file, obj):
                 return GameMode("Custom", np.full((99, 99), "-"), 99)
 
 
-def stat_list_determination(files, var):  # Experimental, not in use
-    # Takes a list of files and initializes their values all at once
-
-    for file in files:
-
-        try:
-            file.value = file[var]
-        except KeyError:
-            print(f"SAVE file or key does not exist. Setting value to 0 (default)")
-            return 0
-
-
 class GameScreen:
     width = 1080
     height = 720
@@ -722,17 +710,6 @@ def connect_game():
         create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.priority else "CPU Turn",
                              game_screen.width / 2.5, game_screen.height * 0.01)
 
-        # Establishing the user inputs for text and indexes and the border boxes that will surround them
-
-        index_search_y = game_screen.height * .33
-        text_search_y = game_screen.height * .60
-
-        # pygame.Rect (x, y, width, height)
-        rect1 = pygame.Rect(game_screen.width / 2, index_search_y, game_screen.width / 12,
-                            game_screen.height / 6)
-        rect2 = pygame.Rect(game_screen.width / 2, text_search_y, game_screen.height / 12,
-                            game_screen.height / 10)
-
         music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
                                           game_screen.height * 0.90, blackish, black, False)
 
@@ -757,10 +734,7 @@ def connect_game():
                 pygame.quit()
                 sys.exit()
             if evnt.type == pygame.MOUSEBUTTONDOWN:
-                if rect1.collidepoint(evnt.pos):
-                    pass
-                if rect2.collidepoint(evnt.pos):
-                    pass
+                pass
 
             if evnt.type == pygame.KEYDOWN:
                 pass
