@@ -25,15 +25,15 @@ losing or tying.
  
 ### TODO
 
-Add constraints on basic CPU/enemy move (no overwriting taken spots)
-
-Win/Loss/Tie checks
+Win/Loss checks
 
 Polish/complete the pre-game / rules display screen, particularly the "no" option
 
 More advanced enemy AI features
 
 post-game resets
+
+variable cell sizes based on the playing field (aka accommodate/implement more game modes on-screen)
 
 Save features, stat-tracking features, replay features, etc. 
 

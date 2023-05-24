@@ -641,20 +641,17 @@ def connect_game():
         if options_button:
             options_menu()
 
-        grid_manager.blit_grid()  # Displaying the grid
+        grid_manager.blit_grid()  # Displaying the grid, also contains the cells and their interactions
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if evnt.type == pygame.MOUSEBUTTONDOWN:
-                pass
 
-            if evnt.type == pygame.KEYDOWN:
-                pass
-
-        pygame.display.update()
+        pygame.display.update()  # Updating the game display
         clock.tick(60)  # Frame-rate
+
+        tie_check()  # Checking for ties (other end-game checks coming later)
 
         if not GameHandler.player_turn:
             if not GameHandler.time_taken:
@@ -746,7 +743,8 @@ grid_manager = GridManager([], [])
 
 def enemy_turn():
     current_time = pygame.time.get_ticks()
-    if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length:
+    if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length \
+            and GameHandler.game_is_active:
 
         row_choice = random.choice(grid_manager.grid)
         cell_choice = random.choice(row_choice)
@@ -756,13 +754,25 @@ def enemy_turn():
         if not cell_choice.value:
             cell_choice.value = GameHandler.enemy_symbol
 
-            print("Conditions were met!")
+            print(f"The enemy has successfully selected cell {cell_choice.cid}!")
             GameHandler.player_turn = True
             GameHandler.time_taken = False
             return
         else:
             enemy_turn()
     # Should have a little time delay before switching over
+
+
+def tie_check():
+    open_cells: int = 0
+    for row in grid_manager.grid:
+        for cell in row:
+            if not cell.value:
+                open_cells += 1
+    if open_cells == 0:
+        print("There are no more available squares and no one has won. The game ends in a tie!")
+        GameHandler.game_is_active = False
+        return
 
 
 # ----------------------------------------------------------------------------------------------------------------------
