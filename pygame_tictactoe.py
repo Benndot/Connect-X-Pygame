@@ -246,7 +246,7 @@ class GameHandler:
     priority: bool = True  # Who goes/went first in a given game
     player_turn = True
 
-    enemy_turn_length = 5000  # in milliseconds
+    enemy_turn_length = 4000  # in milliseconds
     enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
     time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
@@ -321,8 +321,8 @@ def main_menu():
         "Welcome back to Benndot's Connect X game!"
 
     play_game_str = {"Play GameHandler": mode_selection}
-    change_symbol_str = {"Change Symbol": mode_selection}
-    stats_replays_str = {"Stats and Replays": mode_selection}
+    change_symbol_str = {"Change Symbol": symbol_selection}
+    stats_replays_str = {"Stats and Replays": replays_menu}
     audio_options = {"Audio Options": options_menu}
     save_options_str = {"Save File Options": options_menu}
     quit_game_str = {"Quit GameHandler": sys.exit}
@@ -337,13 +337,69 @@ def main_menu():
 
         base_height = game_screen.height * 0.25
         height_multiplier = 1
-        for index, option in enumerate(menu_options):
+        for index, option in enumerate(menu_options, 1):
             button = create_text_button(medium_font, white, f"{index}. {list(option.keys())[0]}", game_screen.width / 4,
                                         base_height * height_multiplier, lighter_green, green, False)
             if button:
                 option.get(list(option.keys())[0])()
 
             height_multiplier += 0.4
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def replays_menu():
+
+    header_message = "Replays Menu"
+
+    greeting = "Go Away"
+
+    while True:
+
+        game_screen.screen.fill((30, 105, 230))
+
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+
+        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+                                           game_screen.height * 0.5, slategray, lightgray, True)
+
+        if return_button:
+            main_menu()
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def symbol_selection():
+
+    header_message = "Symbol Menu"
+
+    greeting = "Go Away"
+
+    while True:
+
+        game_screen.screen.fill((55, 195, 120))
+
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+
+        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+                                           game_screen.height * 0.5, slategray, lightgray, True)
+
+        if return_button:
+            main_menu()
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -364,7 +420,8 @@ def mode_selection():
 
         base_height = game_screen.height * 0.18
         height_multiplier = 1
-        for index, mode in enumerate(game_mode_list):
+
+        for index, mode in enumerate(game_mode_list, 1):
             button = create_text_button(sml_med_font, white, f"{index}. {mode.title}", game_screen.width / 4,
                                         base_height * height_multiplier, lighter_green, green, False)
             if button:
@@ -626,8 +683,9 @@ def connect_game():
 
         game_screen.screen.fill(thistle_green)
 
-        create_onscreen_text(intermediate_font, black, "Player Turn" if GameHandler.player_turn else "CPU Turn",
-                             game_screen.width / 2.5, game_screen.height * 0.01)
+        create_onscreen_text(intermediate_font, (150, 255, 150), "Player Turn", game_screen.width / 2.5,
+                             game_screen.height * 0.01) if GameHandler.player_turn else \
+            create_onscreen_text(intermediate_font, red, "CPU Turn", game_screen.width / 2.5, game_screen.height * 0.01)
 
         music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
                                           game_screen.height * 0.90, blackish, black, False)
@@ -683,11 +741,13 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
         outline_rect = pygame.Rect(x, y, self.width, self.height)
 
-        if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y:  # Hover
+        if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn:  # Hover
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
                     return x, y, self.width, self.height
+        elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and not GameHandler.player_turn:
+            pygame.draw.rect(game_screen.screen, red, outline_rect, int(game_screen.height / 360))
         else:  # Non-hover
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
