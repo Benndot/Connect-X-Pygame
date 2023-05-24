@@ -256,7 +256,7 @@ class GameHandler:
 # ----------------------------------------------------------------------------------------------------------------------
 # 6. Initializing all shelved save data that the game tracks between sessions
 
-# Currently nothing to be saved, as save data is not implemented in this project yet.
+# Currently nothing to be saved, as save-data is not implemented in this project yet.
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 8. Menu, game mode selection (and creation), and board_shape display functions
@@ -752,13 +752,16 @@ def enemy_turn():
         cell_choice = random.choice(row_choice)
 
         print(cell_choice.cid)
-        print(GameHandler.enemy_symbol)
-        cell_choice.value = GameHandler.enemy_symbol
 
-        print("Conditions were met!")
-        GameHandler.player_turn = True
-        GameHandler.time_taken = False
-        return
+        if not cell_choice.value:
+            cell_choice.value = GameHandler.enemy_symbol
+
+            print("Conditions were met!")
+            GameHandler.player_turn = True
+            GameHandler.time_taken = False
+            return
+        else:
+            enemy_turn()
     # Should have a little time delay before switching over
 
 
