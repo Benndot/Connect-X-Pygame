@@ -25,7 +25,7 @@ losing or tying.
  
 ### TODO
 
-Basic enemy turn function (random)
+Add constraints on basic CPU/enemy move (no overwriting taken spots)
 
 Win/Loss/Tie checks
 

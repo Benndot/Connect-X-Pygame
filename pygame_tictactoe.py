@@ -692,8 +692,8 @@ def connect_game():
 # Connect X Gameplay Logic
 
 class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
-    def __init__(self, cell_id: tuple[int, int], pos_factors: tuple[float, float]):
-        self.cell_id = cell_id
+    def __init__(self, cid: tuple[int, int], pos_factors: tuple[float, float]):
+        self.cid = cid
         self.position_factors = pos_factors
         self.value = ""
         self.width = game_screen.width / 10
@@ -720,7 +720,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
     def draw_cell_value(self):
-        create_onscreen_text(large_font, black, GameHandler.player_symbol, self.x + (self.width / 3),
+        create_onscreen_text(large_font, black, self.value, self.x + (self.width / 3),
                              self.y + (self.height / 6))
 
 
@@ -773,11 +773,13 @@ def enemy_turn():
     current_time = pygame.time.get_ticks()
     if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length:
 
-        for row in grid_manager.grid:
-            pass
-            for cell in row:
-                if cell.value:
-                    pass
+        row_choice = random.choice(grid_manager.grid)
+        cell_choice = random.choice(row_choice)
+
+        print(cell_choice.cid)
+        print(GameHandler.enemy_symbol)
+        cell_choice.value = GameHandler.enemy_symbol
+
         print("Conditions were met!")
         GameHandler.player_turn = True
         GameHandler.time_taken = False
