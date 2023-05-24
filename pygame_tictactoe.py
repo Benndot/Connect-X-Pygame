@@ -6,7 +6,6 @@ import math
 from dataclasses import dataclass
 import numpy as np
 import shelve
-# import string
 import music_settings as music
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -161,7 +160,7 @@ def create_text_button(font_choice, text_color, msg, x, y, hover_color, default_
 @dataclass()
 class GameMode:
     title: str  # The name of the game mode
-    board: np.ndarray  # The arrangement/dimensions of the game board
+    board: np.ndarray  # The arrangement/dimensions of the game board_shape
     objective: int  # The number of consecutive characters needed to win
 
 
@@ -192,11 +191,6 @@ class Stat:
     value: int  # the value of that statistic
 
 
-wins = Stat("Wins", 0)
-losses = Stat("Losses", 0)
-ties = Stat("Ties", 0)
-
-
 @dataclass()
 class Replay:
     id: str  # Unchanging unique identifier for each replay instance
@@ -224,67 +218,48 @@ class ReplayManager:
 # 5. DEFINING GLOBAL VARIABLES
 
 
+class DataTracker:
+
+    wins: int = Stat("Wins", 0)
+    losses: int = Stat("Losses", 0)
+    ties: int = Stat("Ties", 0)
+
+    session_counter: int = 0
+
+    # These two lists will track the list of all moves the player and CPU make, to be pushed if a replay is saved
+    player_move_list: list = []
+    enemy_move_list: list = []
+
+    # Variable controlling whether to ask if the rules should be explained
+    rule_toggle: bool = True
+
+
 class GameHandler:
+
     current_mode = connect4
-    board = current_mode.board  # The board of the active game format
+
+    difficulty: int = 80  # Setting a CPU difficulty level variable
+
     player_symbol: str = var_save_value(save_file, "player_symbol", "X")
     enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
-    session_counter: int = 0
-    priority: bool = True
+
+    priority: bool = True  # Who goes/went first in a given game
     player_turn = True
+
     enemy_turn_length = 5000  # in milliseconds
     enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
     time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
+    game_is_active: bool = True
 
-active_game = connect4  # The active game format in use
-
-objective = active_game.objective  # The objective of the active game format
-
-# Determines whether the game is active and certain functions should continue
-game_is_active: bool = True
-
-# Variable controlling whether to ask if the rules should be explained
-rule_toggle: bool = True
-
-session_counter = 0
-
-# Sets of acceptable positive and negative responses to input prompts
-positive_response_list: list = ["Yes", "Y", "Yup", "Affirmative", "Yeah", "Yeayuh", "10-4", "Oui", "Confirm"]
-negative_response_list: list = ["No", "Nay", "Negative", "N", "Nope", "Nuh-uh", "Niet", "Non", "Nah", "Deny"]
-
-# Setting a difficulty level variable
-difficulty: int = 80
-
-player_move_list: list = []  # A list that will contain the sequence of all the moves the player makes
-
-enemy_move_list: list = []  # A list that will contain the sequence of all the moves the CPU makes
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 6. Initializing all shelved save data that the game tracks between sessions
 
-print("Initializing save data... ")
-
-wins.value = obtain_save_value(save_file, wins)
-losses.value = obtain_save_value(save_file, losses)
-ties.value = obtain_save_value(save_file, ties)
-
-ReplayManager.r1 = obtain_save_value(save_file, ReplayManager.r1)
-ReplayManager.r2 = obtain_save_value(save_file, ReplayManager.r2)
-ReplayManager.r3 = obtain_save_value(save_file, ReplayManager.r3)
-ReplayManager.r4 = obtain_save_value(save_file, ReplayManager.r4)
-ReplayManager.r5 = obtain_save_value(save_file, ReplayManager.r5)
-
-# Initialize list after save data is potentially retrieved
-replay_list: list = [ReplayManager.r1, ReplayManager.r2, ReplayManager.r3, ReplayManager.r4, ReplayManager.r5]
-
-# Initialize the user-made custom mode, if it exists in the save file
-custom_mode = obtain_save_value(save_file, custom_mode)
-
-# When game mode win counters start being tracked, their "shelve" name will be obj.name.strip() (to remove spaces)
+# Currently nothing to be saved, as save data is not implemented in this project yet.
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 8. Menu, game mode selection (and creation), and board display functions
+# 8. Menu, game mode selection (and creation), and board_shape display functions
 
 
 def title_screen():
@@ -342,7 +317,7 @@ def title_screen():
 
 def main_menu():
 
-    greeting_message = "Welcome to Benndot's Connect X game!" if GameHandler.session_counter == 0 else \
+    greeting_message = "Welcome to Benndot's Connect X game!" if DataTracker.session_counter == 0 else \
         "Welcome back to Benndot's Connect X game!"
 
     play_game_str = {"Play GameHandler": mode_selection}
@@ -508,7 +483,7 @@ def pre_game_rules(flip_status):
     game_rules = f"{GameHandler.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
                  f"{GameHandler.current_mode.board.shape[0]} by {GameHandler.current_mode.board.shape[1]} board. " \
                  f"The goal of the game is to align {GameHandler.current_mode.objective} of your characters in a row " \
-                 f"anywhere on the board before your opponent does. If the board fills up before either player " \
+                 f"anywhere on the board_shape before your opponent does. If the board fills up before either player " \
                  f"accomplishes this objective, the game ends in a tie."
 
     while True:
