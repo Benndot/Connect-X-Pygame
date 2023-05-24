@@ -642,7 +642,7 @@ def connect_game():
 
     GameHandler.player_turn = True if GameHandler.priority else False
 
-    # GridManager.generate_grid() will be called here right before the game starts
+    grid_manager.generate_grid()  # Creating the grid
 
     while True:
 
@@ -663,10 +663,7 @@ def connect_game():
         if options_button:
             options_menu()
 
-        grid_manager.generate_and_blit_grid()
-
-        for cell in grid_manager.filled_cells:  # Should be integrated into the blit method of the GridManager class
-            cell.draw_cell_value()
+        grid_manager.blit_grid()  # Displaying the grid
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -725,30 +722,7 @@ class GridManager:
         self.grid = grid
         self.filled_cells = filled_cells  # Cells with a value
 
-    def generate_and_blit_grid(self):
-        grid: list[list] = []
-        y_offset_factor = 0.1  # Vertical Spacing
-        for row in range(GameHandler.current_mode.board.shape[0]):
-            x_offset_factor = 0.15  # Horizontal spacing
-            grid_row: list = []  # The rows of the overall grid
-            for col in range(GameHandler.current_mode.board.shape[1]):
-
-                cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
-                physical_cell = cell.generate_cell_on_board()
-                grid_row.append(cell)
-
-                if physical_cell:
-                    print(f"coords: ({physical_cell[0]}, {physical_cell[1]})")
-                    self.filled_cells.append(cell)
-                x_offset_factor += 0.1
-            grid.append(grid_row)
-            y_offset_factor += 0.15
-
-        if not self.grid:
-            print("GameHandler grid is currently empty. Populating...")
-            self.grid = grid
-
-    def generate_grid(self):  # Not implemented, should only need to be called once at the game's beginning
+    def generate_grid(self):
         grid: list[list] = []
         y_offset_factor = 0.1  # Vertical Spacing
         for row in range(GameHandler.current_mode.board.shape[0]):
@@ -759,7 +733,6 @@ class GridManager:
             for col in range(GameHandler.current_mode.board.shape[1]):
 
                 cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
-                print(f"Current cell_id: {cell.cell_id}")
                 grid_row.append(cell)
                 x_offset_factor += 0.1
 
@@ -769,17 +742,19 @@ class GridManager:
         if not self.grid:
             print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
-            print(self.grid, type(self.grid[0]), type(self.grid[0][0]))
 
-    def blit_grid(self):  # Not implemented
+    def blit_grid(self):
         if not self.grid:
-            print("The game grid does not exist, something went wrong")
+            print("The game grid does not exist, something went wrong. Resetting.")
+            main()
         for row in self.grid:
             for cell in row:
-                # Blit cell here
+                physical_cell = cell.generate_cell_on_board()
                 if cell.value:
-                    print(f"cell id {cell.cell_id} has a value of {cell.value}")
                     cell.draw_cell_value()
+                if physical_cell:
+                    print("A cell has been claimed!")
+                    cell.value = GameHandler.player_symbol
 
 
 grid_manager = GridManager([], [])
