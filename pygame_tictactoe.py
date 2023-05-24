@@ -232,6 +232,9 @@ class GameHandler:
     session_counter: int = 0
     priority: bool = True
     player_turn = True
+    enemy_turn_length = 5000  # in milliseconds
+    enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
+    time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
 
 active_game = connect4  # The active game format in use
@@ -676,7 +679,13 @@ def connect_game():
                 pass
 
         pygame.display.update()
-        clock.tick(15)
+        clock.tick(60)  # Frame-rate
+
+        if not GameHandler.player_turn:
+            if not GameHandler.time_taken:
+                GameHandler.enemy_turn_start_time = pygame.time.get_ticks()
+                GameHandler.time_taken = True
+            enemy_turn()
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -706,7 +715,6 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
-                    self.value = GameHandler.player_symbol
                     return x, y, self.width, self.height
         else:  # Non-hover
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
@@ -752,12 +760,29 @@ class GridManager:
                 physical_cell = cell.generate_cell_on_board()
                 if cell.value:
                     cell.draw_cell_value()
-                if physical_cell:
+                if physical_cell and GameHandler.player_turn:
                     print("A cell has been claimed!")
                     cell.value = GameHandler.player_symbol
+                    GameHandler.player_turn = False
 
 
 grid_manager = GridManager([], [])
+
+
+def enemy_turn():
+    current_time = pygame.time.get_ticks()
+    if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length:
+
+        for row in grid_manager.grid:
+            pass
+            for cell in row:
+                if cell.value:
+                    pass
+        print("Conditions were met!")
+        GameHandler.player_turn = True
+        GameHandler.time_taken = False
+        return
+    # Should have a little time delay before switching over
 
 
 # ----------------------------------------------------------------------------------------------------------------------
