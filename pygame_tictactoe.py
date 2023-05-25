@@ -162,9 +162,17 @@ class GameMode:
     title: str  # The name of the game mode
     board: np.ndarray  # The arrangement/dimensions of the game board_shape
     objective: int  # The number of consecutive characters needed to win
+    cell_width: float = float(game_screen.width / 10)
+    cell_height: float = float(game_screen.height / 7)
+    cell_x_offset: float = float(0.15)  # A multiplier for determining a cell's generated position
+    cell_y_offset: float = float(0.12)  # A multiplier for determining a cell's generated position
+    x_offset_step: float = float(0.1)  # The space multiplier that separates each cell as they're generated
+    y_offset_step: float = float(0.15)
 
 
-connect4 = GameMode("Connect4", np.full((6, 7), "-"), 4)
+connect4 = GameMode("Connect4", np.full((6, 7), "-"), 4, cell_width=float(game_screen.width / 11),
+                    cell_height=float(game_screen.height / 8), x_offset_step=float(0.095),
+                    y_offset_step=float(0.125), cell_x_offset=float(0.17))
 
 connect3 = GameMode("Connect3", np.full((4, 5), "-"), 3)
 
@@ -172,7 +180,9 @@ wide_boi = GameMode("Wide Boi", np.full((4, 8), "-"), 4)
 
 tall_boi = GameMode("Tall Boi", np.full((8, 4), "-"), 4)
 
-tic_tac_toe = GameMode("Tic-Tac-Toe", np.full((3, 3), "-"), 3)
+tic_tac_toe = GameMode("Tic-Tac-Toe", np.full((3, 3), "-"), 3, cell_width=float(game_screen.width / 6.5),
+                       cell_height=float(game_screen.height / 5), x_offset_step=float(0.16),
+                       y_offset_step=float(0.22), cell_x_offset=float(0.24))
 
 cheese_crackers = GameMode("Cheese & Crackers", np.full((5, 5), "-"), 4)
 
@@ -246,7 +256,7 @@ class GameHandler:
     priority: bool = True  # Who goes/went first in a given game
     player_turn = True
 
-    enemy_turn_length = 4000  # in milliseconds
+    enemy_turn_length = 3500  # in milliseconds
     enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
     time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
@@ -425,6 +435,7 @@ def mode_selection():
             button = create_text_button(sml_med_font, white, f"{index}. {mode.title}", game_screen.width / 4,
                                         base_height * height_multiplier, lighter_green, green, False)
             if button:
+                GridManager.grid = []
                 GameHandler.current_mode = mode
                 coin_flip()
 
@@ -755,10 +766,10 @@ def post_game():
 class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
     def __init__(self, cid: tuple[int, int], pos_factors: tuple[float, float]):
         self.cid = cid
-        self.position_factors = pos_factors
         self.value = ""
-        self.width = game_screen.width / 10
-        self.height = game_screen.height / 7
+        self.position_factors = pos_factors  # The game-mode-dependent offsets that cells are generated with
+        self.width = GameHandler.current_mode.cell_width
+        self.height = GameHandler.current_mode.cell_height
         self.x = None
         self.y = None
 
@@ -791,26 +802,25 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
 class GridManager:
 
-    def __init__(self, grid: list[list[GridCell]], filled_cells: list):
+    def __init__(self, grid: list[list[GridCell]]):
         self.grid = grid
-        self.filled_cells = filled_cells  # Cells with a value
 
     def generate_grid(self):
         grid: list[list] = []
-        y_offset_factor = 0.1  # Vertical Spacing
+        y_offset_factor = GameHandler.current_mode.cell_y_offset  # Vertical Spacing
         for row in range(GameHandler.current_mode.board.shape[0]):
 
-            x_offset_factor = 0.15  # Horizontal spacing
+            x_offset_factor = GameHandler.current_mode.cell_x_offset  # Horizontal spacing
             grid_row: list = []  # The rows of the overall grid that will be inserted
 
             for col in range(GameHandler.current_mode.board.shape[1]):
 
                 cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
                 grid_row.append(cell)
-                x_offset_factor += 0.1
+                x_offset_factor += GameHandler.current_mode.x_offset_step
 
             grid.append(grid_row)
-            y_offset_factor += 0.15
+            y_offset_factor += GameHandler.current_mode.y_offset_step
 
         if not self.grid:
             print("GameHandler grid is currently empty. Populating...")
@@ -831,7 +841,7 @@ class GridManager:
                     GameHandler.player_turn = False
 
 
-grid_manager = GridManager([], [])
+grid_manager = GridManager([])
 
 
 def enemy_turn():
