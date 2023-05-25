@@ -787,6 +787,8 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
         if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn:  # Hover
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
+            # hover_click = mixer.Sound('audio/thewilliamsounds_button_click.mp3')
+            # mixer.Sound.play(hover_click)
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
                     return x, y, self.width, self.height
@@ -837,6 +839,8 @@ class GridManager:
                     cell.draw_cell_value()
                 if physical_cell and GameHandler.player_turn:
                     print("A cell has been claimed!")
+                    stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
+                    mixer.Sound.play(stamp_sound)
                     cell.value = GameHandler.player_symbol
                     GameHandler.player_turn = False
 
@@ -855,6 +859,10 @@ def enemy_turn():
         print(cell_choice.cid)
 
         if not cell_choice.value:
+
+            stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
+            mixer.Sound.play(stamp_sound)
+
             cell_choice.value = GameHandler.enemy_symbol
 
             print(f"The enemy has successfully selected cell {cell_choice.cid}!")

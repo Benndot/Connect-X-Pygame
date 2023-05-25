@@ -1,6 +1,7 @@
 import random
 from pygame import mixer
 
+
 class MusicSettings:
 
     volume_level = 50
