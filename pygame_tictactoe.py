@@ -250,7 +250,7 @@ class GameHandler:
     enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
     time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
-    game_is_active: bool = True
+    game_status: str = "ongoing"  # Options are ongoing, won, lost, tied
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -320,7 +320,7 @@ def main_menu():
     greeting_message = "Welcome to Benndot's Connect X game!" if DataTracker.session_counter == 0 else \
         "Welcome back to Benndot's Connect X game!"
 
-    play_game_str = {"Play GameHandler": mode_selection}
+    play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
     stats_replays_str = {"Stats and Replays": replays_menu}
     audio_options = {"Audio Options": options_menu}
@@ -425,6 +425,7 @@ def mode_selection():
             button = create_text_button(sml_med_font, white, f"{index}. {mode.title}", game_screen.width / 4,
                                         base_height * height_multiplier, lighter_green, green, False)
             if button:
+                GameHandler.current_mode = mode
                 coin_flip()
 
             height_multiplier += 0.5
@@ -683,7 +684,7 @@ def connect_game():
 
         game_screen.screen.fill(thistle_green)
 
-        create_onscreen_text(intermediate_font, (150, 255, 150), "Player Turn", game_screen.width / 2.5,
+        create_onscreen_text(intermediate_font, (0, 200, 0), "Player Turn", game_screen.width / 2.5,
                              game_screen.height * 0.01) if GameHandler.player_turn else \
             create_onscreen_text(intermediate_font, red, "CPU Turn", game_screen.width / 2.5, game_screen.height * 0.01)
 
@@ -717,9 +718,39 @@ def connect_game():
                 GameHandler.time_taken = True
             enemy_turn()
 
+        if GameHandler.game_status != "ongoing":
+            post_game()
 
+
+def post_game():
+
+    header_message = "Post-Game Screen"
+
+    greeting = "Go Away"
+
+    while True:
+
+        game_screen.screen.fill((55, 195, 120))
+
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+
+        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+                                           game_screen.height * 0.5, slategray, lightgray, True)
+
+        if return_button:
+            main_menu()
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
 # ----------------------------------------------------------------------------------------------------------------------
 # Connect X Gameplay Logic
+
 
 class GridCell:  # Currently generated inside the GridManager.generate_and_blit_grid() method
     def __init__(self, cid: tuple[int, int], pos_factors: tuple[float, float]):
@@ -730,6 +761,8 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
         self.height = game_screen.height / 7
         self.x = None
         self.y = None
+
+        self.is_victory_cell = False  # To single out a few to be highlighted when a game is won
 
     def generate_cell_on_board(self):
 
@@ -804,7 +837,7 @@ grid_manager = GridManager([], [])
 def enemy_turn():
     current_time = pygame.time.get_ticks()
     if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length \
-            and GameHandler.game_is_active:
+            and GameHandler.game_status == "ongoing":
 
         row_choice = random.choice(grid_manager.grid)
         cell_choice = random.choice(row_choice)
@@ -831,7 +864,7 @@ def tie_check():
                 open_cells += 1
     if open_cells == 0:
         print("There are no more available squares and no one has won. The game ends in a tie!")
-        GameHandler.game_is_active = False
+        GameHandler.game_status = "Tied"
         return
 
 
