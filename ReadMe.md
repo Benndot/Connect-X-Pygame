@@ -22,14 +22,12 @@ are also found throughout the game outside the menu in various spots for conveni
 The core game so far only consists of a board of interactive cells. The cells will change color when hovered over, and 
 will gain the player's symbol when clicked (if it is the user's turn). Sound effects for hovering and claiming squares
 have also been implemented. A turn system between the user and a randomly selecting computer opponent is fully 
-implemented. Currently, only the tie scenario is implemented.
+implemented. Win/loss checks are implemented both for the player and the CPU.
 
 A simple post-game screen has been added in the case of a tie, but it is also under construction and lacking features
 that it's intended to eventually have. 
  
 ### TODO
-
-Win/Loss checks
 
 Create a pause between win/loss/tie move and the user being brought the post-game screen
 
