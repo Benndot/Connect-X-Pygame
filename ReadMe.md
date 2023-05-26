@@ -31,11 +31,13 @@ eventually. The board resets after a game ends, so the game loop is now fully fu
 
 Create a pause between win/loss/tie move and the user being brought the post-game screen
 
+In-game music menu should return user to the connectX game rather than the title screen
+
+Sound effects for hovering and clicking cells during the opponents turn
+
 Polish/complete the pre-game / rules display screen, particularly the "no" option
 
 More advanced enemy AI features
-
-display tracked game stats
 
 implement basic save file features
 

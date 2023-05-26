@@ -174,7 +174,9 @@ connect4 = GameMode("Connect4", np.full((6, 7), "-"), 4, cell_width=float(game_s
                     cell_height=float(game_screen.height / 8), x_offset_step=float(0.095),
                     y_offset_step=float(0.125), cell_x_offset=float(0.17))
 
-connect3 = GameMode("Connect3", np.full((4, 5), "-"), 3)
+connect3 = GameMode("Connect3", np.full((4, 5), "-"), 3, cell_width=float(game_screen.width / 8.5),
+                    cell_height=float(game_screen.height / 6.5), x_offset_step=float(0.12),
+                    y_offset_step=float(0.16), cell_x_offset=float(0.2))
 
 wide_boi = GameMode("Wide Boi", np.full((4, 8), "-"), 4)
 
@@ -233,8 +235,6 @@ class DataTracker:
     wins = Stat("Wins", 0)
     losses = Stat("Losses", 0)
     ties = Stat("Ties", 0)
-
-    session_counter: int = 0
 
     # These two lists will track the list of all moves the player and CPU make, to be pushed if a replay is saved
     player_move_list: list = []
@@ -327,8 +327,7 @@ def title_screen():
 
 def main_menu():
 
-    greeting_message = "Welcome to Benndot's Connect X game!" if DataTracker.session_counter == 0 else \
-        "Welcome back to Benndot's Connect X game!"
+    greeting_message = "Main Menu!"
 
     play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
@@ -343,7 +342,14 @@ def main_menu():
 
         game_screen.screen.fill((230, 60, 160))
 
-        create_onscreen_text(medium_font, black, greeting_message, game_screen.width / 4, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting_message, game_screen.width / 2.5, game_screen.height * 0.05)
+
+        create_onscreen_text(medium_font, black, f"Wins: {DataTracker.wins.value}", game_screen.width / 15,
+                             game_screen.height * 0.9)
+        create_onscreen_text(medium_font, black, f"Losses: {DataTracker.losses.value}", game_screen.width / 2.25,
+                             game_screen.height * 0.9)
+        create_onscreen_text(medium_font, black, f"Ties: {DataTracker.ties.value}", game_screen.width / 1.2,
+                             game_screen.height * 0.9)
 
         base_height = game_screen.height * 0.25
         height_multiplier = 1
@@ -664,8 +670,7 @@ def options_menu():
             print("Track change initiated")
             music_object.cycle_track()
 
-        current_track_name = music_object.tracklist[music_object.current_track_index][6:-4] if \
-            music_object.current_track_index != 13 else "    ????????????????????"
+        current_track_name = music_object.tracklist[music_object.current_track_index][6:-4]
         current_track_text = sml_med_font.render(f'Current Track: ' + current_track_name, True, blackish)
         game_screen.screen.blit(current_track_text, (game_screen.width / 6, game_screen.height / 1.6))
 
@@ -989,7 +994,6 @@ def win_loss_check(symbol):
 
 def post_game_reset():
 
-    DataTracker.session_counter += 1
     if GameHandler.game_status == "won":
         DataTracker.wins.value += 1
     elif GameHandler.game_status == "lost":
