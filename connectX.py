@@ -721,6 +721,8 @@ def connect_game():
         pygame.display.update()  # Updating the game display
         clock.tick(60)  # Frame-rate
 
+        for symbol in [GameHandler.player_symbol, GameHandler.enemy_symbol]:
+            win_loss_check(symbol)
         tie_check()  # Checking for ties (other end-game checks coming later)
 
         if not GameHandler.player_turn:
@@ -875,7 +877,6 @@ def enemy_turn():
             return
         else:
             enemy_turn()
-    # Should have a little time delay before switching over
 
 
 def tie_check():
@@ -888,6 +889,30 @@ def tie_check():
         print("There are no more available squares and no one has won. The game ends in a tie!")
         GameHandler.game_status = "Tied"
         return
+
+
+def win_loss_check(symbol):
+
+    # Checking rows (horizontal)
+    for row in grid_manager.grid:
+        symbol_count = 0
+        for cell in row:
+            if cell.value == symbol:
+                symbol_count += 1
+            else:  # Reset the count
+                symbol_count = 0
+            if symbol_count == GameHandler.current_mode.objective:
+                print("Victory condition reached for")
+                if symbol == GameHandler.player_symbol:
+                    GameHandler.game_status = "Won"
+                if symbol == GameHandler.enemy_symbol:
+                    GameHandler.game_status = "Lost"
+
+    # Checking columns
+    column_count = 0
+    while column_count <= GameHandler.current_mode.board.shape[1] - 1:
+        symbol_count = 0
+        break
 
 
 # ----------------------------------------------------------------------------------------------------------------------
