@@ -301,7 +301,7 @@ def title_screen():
                                             game_screen.height * 0.02, (200, 200, 0), (120, 120, 0), True)
 
         if options_button:
-            options_menu()
+            sound_menu()
 
         music_button = create_text_button(small_font, blackish, "Toggle Music", game_screen.width * .925,
                                           game_screen.height * 0.035, lightgray, slategray, True)
@@ -332,8 +332,8 @@ def main_menu():
     play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
     stats_replays_str = {"Stats and Replays": replays_menu}
-    audio_options = {"Audio Options": options_menu}
-    save_options_str = {"Save File Options": options_menu}
+    audio_options = {"Audio Options": sound_menu}
+    save_options_str = {"Save File Options": save_settings}
     quit_game_str = {"Quit GameHandler": sys.exit}
 
     menu_options = [play_game_str, change_symbol_str, stats_replays_str, audio_options, save_options_str, quit_game_str]
@@ -416,6 +416,103 @@ def symbol_selection():
 
         if return_button:
             main_menu()
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def save_settings():
+
+    header_message = "Save Settings"
+
+    greeting = "Go Away"
+
+    while True:
+
+        game_screen.screen.fill((85, 165, 180))
+
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+
+        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+                                           game_screen.height * 0.5, slategray, lightgray, True)
+
+        if return_button:
+            main_menu()
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def sound_menu():
+
+    title_text = large_font.render("Options Menu", True, blackish)
+
+    while True:
+        game_screen.screen.fill(thistle_green)
+        game_screen.screen.blit(title_text, ((game_screen.width - title_text.get_width()) / 2, 0))
+
+        music_button = create_text_button(medium_font, white, "Toggle Music", game_screen.width / 1.97,
+                                          game_screen.height / 6.5, lightgray, slategray, True)
+        if music_button:
+            music_object.music_toggle()
+
+        # Bool declaration
+        music_pause_declaration = "Yes" if music_object.music_paused else "No"
+        music_paused_text = medium_font.render(f"Music Paused: " + music_pause_declaration, True, blackish)
+        bool_text_x = (game_screen.width - music_paused_text.get_width()) / 2
+        bool_text_y = (game_screen.height - music_paused_text.get_height()) / 3.8
+        game_screen.screen.blit(music_paused_text, (bool_text_x, bool_text_y))
+
+        volume_height = game_screen.height / 2.8
+        volume_text = medium_font.render(f"{music_object.volume_level}", True, black)
+        volume_text_x = (game_screen.width / 2) - (volume_text.get_width() / 2) + 5
+        game_screen.screen.blit(volume_text, (volume_text_x, volume_height - 10))
+
+        volume_up_button = create_text_button(small_font, white, "Volume +", game_screen.width / 2.25,
+                                              volume_height, slategray, lightgray, True)
+
+        volume_down_button = create_text_button(small_font, white, "Volume -", game_screen.width / 1.75,
+                                                volume_height, slategray, lightgray, True)
+
+        if volume_up_button:
+            print("volume increased!")
+            music_object.change_music_volume(10)
+        if volume_down_button:
+            print("volume decreased!")
+            music_object.change_music_volume(-10)
+
+        if music_object.volume_level == 0:
+            muted_text = medium_font.render("(muted)", True, thunderbird_red)
+            game_screen.screen.blit(muted_text, (volume_text_x * .92, volume_height + 25))
+
+        music_changer = create_text_button(intermediate_font, white, "Change Music Track", game_screen.width / 2,
+                                           game_screen.height / 2.2, slategray, lightgray, True)
+
+        if music_changer:
+            print("Track change initiated")
+            music_object.cycle_track()
+
+        current_track_name = music_object.tracklist[music_object.current_track_index][6:-4]
+        current_track_text = sml_med_font.render(f'Current Track: ' + current_track_name, True, blackish)
+        game_screen.screen.blit(current_track_text, (game_screen.width / 6, game_screen.height / 1.6))
+
+        # Return to start menu button
+        return_button = create_text_button(medium_font, white, "Return To Start", game_screen.width / 2,
+                                           game_screen.height / 1.25, slategray, lightgray, True)
+
+        if return_button:
+            title_screen()
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -621,75 +718,6 @@ def pre_game_rules(flip_status):
         clock.tick(8)
 
 
-def options_menu():
-
-    title_text = large_font.render("Options Menu", True, blackish)
-
-    while True:
-        game_screen.screen.fill(thistle_green)
-        game_screen.screen.blit(title_text, ((game_screen.width - title_text.get_width()) / 2, 0))
-
-        music_button = create_text_button(medium_font, white, "Toggle Music", game_screen.width / 1.97,
-                                          game_screen.height / 6.5, lightgray, slategray, True)
-        if music_button:
-            music_object.music_toggle()
-
-        # Bool declaration
-        music_pause_declaration = "Yes" if music_object.music_paused else "No"
-        music_paused_text = medium_font.render(f"Music Paused: " + music_pause_declaration, True, blackish)
-        bool_text_x = (game_screen.width - music_paused_text.get_width()) / 2
-        bool_text_y = (game_screen.height - music_paused_text.get_height()) / 3.8
-        game_screen.screen.blit(music_paused_text, (bool_text_x, bool_text_y))
-
-        volume_height = game_screen.height / 2.8
-        volume_text = medium_font.render(f"{music_object.volume_level}", True, black)
-        volume_text_x = (game_screen.width / 2) - (volume_text.get_width() / 2) + 5
-        game_screen.screen.blit(volume_text, (volume_text_x, volume_height - 10))
-
-        volume_up_button = create_text_button(small_font, white, "Volume +", game_screen.width / 2.25,
-                                              volume_height, slategray, lightgray, True)
-
-        volume_down_button = create_text_button(small_font, white, "Volume -", game_screen.width / 1.75,
-                                                volume_height, slategray, lightgray, True)
-
-        if volume_up_button:
-            print("volume increased!")
-            music_object.change_music_volume(10)
-        if volume_down_button:
-            print("volume decreased!")
-            music_object.change_music_volume(-10)
-
-        if music_object.volume_level == 0:
-            muted_text = medium_font.render("(muted)", True, thunderbird_red)
-            game_screen.screen.blit(muted_text, (volume_text_x * .92, volume_height + 25))
-
-        music_changer = create_text_button(intermediate_font, white, "Change Music Track", game_screen.width / 2,
-                                           game_screen.height / 2.2, slategray, lightgray, True)
-
-        if music_changer:
-            print("Track change initiated")
-            music_object.cycle_track()
-
-        current_track_name = music_object.tracklist[music_object.current_track_index][6:-4]
-        current_track_text = sml_med_font.render(f'Current Track: ' + current_track_name, True, blackish)
-        game_screen.screen.blit(current_track_text, (game_screen.width / 6, game_screen.height / 1.6))
-
-        # Return to start menu button
-        return_button = create_text_button(medium_font, white, "Return To Start", game_screen.width / 2,
-                                           game_screen.height / 1.25, slategray, lightgray, True)
-
-        if return_button:
-            title_screen()
-
-        for evnt in pygame.event.get():
-            if evnt.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        pygame.display.update()
-        clock.tick(15)
-
-
 def connect_game():
 
     GameHandler.player_turn = True if GameHandler.priority else False
@@ -714,7 +742,7 @@ def connect_game():
                                             (0, 200, 0), green, False)
 
         if options_button:
-            options_menu()
+            sound_menu()
 
         grid_manager.blit_grid()  # Displaying the grid, also contains the cells and their interactions
 
