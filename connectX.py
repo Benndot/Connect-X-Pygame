@@ -230,9 +230,9 @@ class ReplayManager:
 
 class DataTracker:
 
-    wins: int = Stat("Wins", 0)
-    losses: int = Stat("Losses", 0)
-    ties: int = Stat("Ties", 0)
+    wins = Stat("Wins", 0)
+    losses = Stat("Losses", 0)
+    ties = Stat("Ties", 0)
 
     session_counter: int = 0
 
@@ -737,7 +737,7 @@ def connect_game():
 
 def post_game():
 
-    header_message = "Post-Game Screen"
+    header_message = f"You have {GameHandler.game_status} the game!"
 
     greeting = "Go Away"
 
@@ -752,6 +752,7 @@ def post_game():
                                            game_screen.height * 0.5, slategray, lightgray, True)
 
         if return_button:
+            post_game_reset()
             main_menu()
 
         for evnt in pygame.event.get():
@@ -887,7 +888,7 @@ def tie_check():
                 open_cells += 1
     if open_cells == 0:
         print("There are no more available squares and no one has won. The game ends in a tie!")
-        GameHandler.game_status = "Tied"
+        GameHandler.game_status = "tied"
         return
 
 
@@ -904,9 +905,9 @@ def win_loss_check(symbol):
             if symbol_count == GameHandler.current_mode.objective:
                 print("Victory condition reached (row)")
                 if symbol == GameHandler.player_symbol:
-                    GameHandler.game_status = "Won"
+                    GameHandler.game_status = "won"
                 if symbol == GameHandler.enemy_symbol:
-                    GameHandler.game_status = "Lost"
+                    GameHandler.game_status = "lost"
 
     # Checking columns
     column_count = 0
@@ -920,9 +921,9 @@ def win_loss_check(symbol):
             if symbol_count == GameHandler.current_mode.objective:
                 print("Victory condition reached (column)")
                 if symbol == GameHandler.player_symbol:
-                    GameHandler.game_status = "Won"
+                    GameHandler.game_status = "won"
                 if symbol == GameHandler.enemy_symbol:
-                    GameHandler.game_status = "Lost"
+                    GameHandler.game_status = "lost"
 
         column_count += 1
 
@@ -949,9 +950,9 @@ def win_loss_check(symbol):
                         if symbol_count == GameHandler.current_mode.objective:
                             print("Victory condition reached (forward diagonal)")
                             if symbol == GameHandler.player_symbol:
-                                GameHandler.game_status = "Won"
+                                GameHandler.game_status = "won"
                             if symbol == GameHandler.enemy_symbol:
-                                GameHandler.game_status = "Lost"
+                                GameHandler.game_status = "lost"
                     else:
                         break
 
@@ -978,13 +979,26 @@ def win_loss_check(symbol):
                         if symbol_count == GameHandler.current_mode.objective:
                             print("Victory condition reached (forward diagonal)")
                             if symbol == GameHandler.player_symbol:
-                                GameHandler.game_status = "Won"
+                                GameHandler.game_status = "won"
                             if symbol == GameHandler.enemy_symbol:
-                                GameHandler.game_status = "Lost"
+                                GameHandler.game_status = "lost"
 
                     else:
                         break
 
+
+def post_game_reset():
+
+    DataTracker.session_counter += 1
+    if GameHandler.game_status == "won":
+        DataTracker.wins.value += 1
+    elif GameHandler.game_status == "lost":
+        DataTracker.losses.value += 1
+    elif GameHandler.game_status == "tied":
+        DataTracker.ties.value += 1
+
+    grid_manager.grid = []
+    GameHandler.game_status = "ongoing"
 
 # ----------------------------------------------------------------------------------------------------------------------
 

@@ -24,8 +24,8 @@ will gain the player's symbol when clicked (if it is the user's turn). Sound eff
 have also been implemented. A turn system between the user and a randomly selecting computer opponent is fully 
 implemented. Win/loss checks are implemented both for the player and the CPU.
 
-A simple post-game screen has been added in the case of a tie, but it is also under construction and lacking features
-that it's intended to eventually have. 
+A simple post-game screen currently exists, tell the user the outcome of the game. This will be more fully featured
+eventually. The board resets after a game ends, so the game loop is now fully functional.
  
 ### TODO
 
@@ -35,9 +35,11 @@ Polish/complete the pre-game / rules display screen, particularly the "no" optio
 
 More advanced enemy AI features
 
-post-game resets
+display tracked game stats
+
+implement basic save file features
+
+create replays and replay saving system
 
 keep on making variable cell sizes/spacing based on the amount of squares to render (aka the size of the board)
-
-Save features, stat-tracking features, replay features, etc.
 
