@@ -774,6 +774,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
         self.y = None
 
         self.is_victory_cell = False  # To single out a few to be highlighted when a game is won
+        self.is_hovered = False
 
     def generate_cell_on_board(self):
 
@@ -787,14 +788,17 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
         if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn:  # Hover
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
-            # hover_click = mixer.Sound('audio/thewilliamsounds_button_click.mp3')
-            # mixer.Sound.play(hover_click)
+            if not self.is_hovered:
+                hover_sound = mixer.Sound('audio/button_click.mp3')
+                mixer.Sound.play(hover_sound)
+                self.is_hovered = True
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
                     return x, y, self.width, self.height
         elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and not GameHandler.player_turn:
             pygame.draw.rect(game_screen.screen, red, outline_rect, int(game_screen.height / 360))
         else:  # Non-hover
+            self.is_hovered = False
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
     def draw_cell_value(self):

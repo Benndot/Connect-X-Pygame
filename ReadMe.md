@@ -20,8 +20,9 @@ A multiple song soundtrack with an options menu to tweak the volume, change song
 are also found throughout the game outside the menu in various spots for convenience. 
 
 The core game so far only consists of a board of interactive cells. The cells will change color when hovered over, and 
-will gain the player's symbol when clicked (if it is the user's turn). A turn system between the user and a randomly 
-selecting computer opponent is fully implemented. Currently, only the tie scenario is implemented.
+will gain the player's symbol when clicked (if it is the user's turn). Sound effects for hovering and claiming squares
+have also been implemented. A turn system between the user and a randomly selecting computer opponent is fully 
+implemented. Currently, only the tie scenario is implemented.
 
 A simple post-game screen has been added in the case of a tie, but it is also under construction and lacking features
 that it's intended to eventually have. 
