@@ -902,7 +902,7 @@ def win_loss_check(symbol):
             else:  # Reset the count
                 symbol_count = 0
             if symbol_count == GameHandler.current_mode.objective:
-                print("Victory condition reached for")
+                print("Victory condition reached (row)")
                 if symbol == GameHandler.player_symbol:
                     GameHandler.game_status = "Won"
                 if symbol == GameHandler.enemy_symbol:
@@ -912,7 +912,19 @@ def win_loss_check(symbol):
     column_count = 0
     while column_count <= GameHandler.current_mode.board.shape[1] - 1:
         symbol_count = 0
-        break
+        for row in grid_manager.grid:
+            if row[column_count].value == symbol:
+                symbol_count += 1
+            else:
+                symbol_count = 0
+            if symbol_count == GameHandler.current_mode.objective:
+                print("Victory condition reached (column)")
+                if symbol == GameHandler.player_symbol:
+                    GameHandler.game_status = "Won"
+                if symbol == GameHandler.enemy_symbol:
+                    GameHandler.game_status = "Lost"
+
+        column_count += 1
 
 
 # ----------------------------------------------------------------------------------------------------------------------
