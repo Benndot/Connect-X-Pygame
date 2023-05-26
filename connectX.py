@@ -926,6 +926,36 @@ def win_loss_check(symbol):
 
         column_count += 1
 
+    # Checking forward-diagonals
+    for row_ind, row in enumerate(grid_manager.grid):
+        for col_ind, cell in enumerate(row):
+            y = row_ind
+            x = col_ind
+
+            symbol_count = 0
+
+            board_size_y = GameHandler.current_mode.board.shape[0]
+            board_size_x = GameHandler.current_mode.board.shape[1]
+
+            while True:
+                if y > board_size_y - 1 or x > board_size_x - 1:  # If values were larger than grid can support
+                    break
+
+                else:
+                    if grid_manager.grid[y][x].value == symbol:
+                        y += 1
+                        x += 1
+                        symbol_count += 1
+                        if symbol_count == GameHandler.current_mode.objective:
+                            print("Victory condition reached (forward diagonal)")
+                            if symbol == GameHandler.player_symbol:
+                                GameHandler.game_status = "Won"
+                            if symbol == GameHandler.enemy_symbol:
+                                GameHandler.game_status = "Lost"
+                    else:
+                        break
+
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
