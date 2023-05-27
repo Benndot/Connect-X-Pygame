@@ -24,16 +24,13 @@ will gain the player's symbol when clicked (if it is the user's turn). Sound eff
 have also been implemented. A turn system between the user and a randomly selecting computer opponent is fully 
 implemented. Win/loss checks are implemented both for the player and the CPU.
 
-A simple post-game screen currently exists, tell the user the outcome of the game. This will be more fully featured
-eventually. The board resets after a game ends, so the game loop is now fully functional.
+A simple post-game screen currently exists, playing a short sound clip and telling the user the outcome of the game. 
+This will be more fully featured eventually. The board resets after a game ends, so the game loop is now fully 
+functional.
  
 ### TODO
 
 Create a pause between win/loss/tie move and the user being brought the post-game screen
-
-win / loss / tie sound effects or jingles
-
-Sound effects for hovering and clicking cells during the opponents turn
 
 Polish/complete the pre-game / rules display screen, particularly the "no" option
 
