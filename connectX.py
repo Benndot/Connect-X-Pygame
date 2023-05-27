@@ -832,6 +832,14 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
                     return x, y, self.width, self.height
         elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and not GameHandler.player_turn:
             pygame.draw.rect(game_screen.screen, red, outline_rect, int(game_screen.height / 360))
+            if not self.is_hovered:
+                hover_sound = mixer.Sound('audio/button_click.mp3')
+                mixer.Sound.play(hover_sound)
+                self.is_hovered = True
+            for evnt in pygame.event.get():
+                if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
+                    rejection_sound = mixer.Sound('audio/rejection.wav')
+                    mixer.Sound.play(rejection_sound)
         else:  # Non-hover
             self.is_hovered = False
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
