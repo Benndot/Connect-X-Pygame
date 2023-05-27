@@ -109,11 +109,32 @@ thistle_green = (210, 210, 190)
 black = (0, 0, 0)
 
 
-def create_onscreen_text(font_size, color, message, x, y,):
+def create_onscreen_text(font_size, color, message, x, y, x_adjust: bool = False):
 
     text = font_size.render(message, True, color)
 
+    if x_adjust:
+        text_width = text.get_width()
+        x = x - (text_width / 2)
+
     game_screen.screen.blit(text, (x, y))
+
+
+def display_text_over_multiple_lines(text, font, line_character_limit, start_x, start_y, line_height_step):
+    start_index = 0
+    height_multiplier = 1
+    index_counter = 0
+    for index, char in enumerate(text):
+        index_counter += 1
+        if char == " " and index_counter >= line_character_limit:
+            end_index = index + 1
+            create_onscreen_text(font, black, text[start_index: end_index], start_x, start_y * height_multiplier, False)
+            height_multiplier += line_height_step
+            start_index = index
+            index_counter = 0
+        if index >= len(text) - 1:
+            create_onscreen_text(font, black, text[start_index: -1], start_x, start_y * height_multiplier, False)
+            break
 
 
 def create_transparent_button(width, height, x, y):
@@ -277,9 +298,6 @@ class GameHandler:
 
 def title_screen():
 
-    start_text = intermediate_font.render("Connect X", True, white)
-    credit_text = sml_med_font.render("by Benndot", True, white)
-
     title_image = pygame.image.load("images/connect4-board-pic.jpg")
 
     nav_bar_height = game_screen.height / 7
@@ -290,9 +308,11 @@ def title_screen():
 
     while True:
         game_screen.screen.fill((0, 0, 200))
-        game_screen.screen.blit(start_text, ((game_screen.width - start_text.get_width()) / 2, game_screen.height / 75))
-        game_screen.screen.blit(credit_text, ((game_screen.width - start_text.get_width()) / 1.9,
-                                              game_screen.height / 12))
+
+        create_onscreen_text(intermediate_font, white, "Connect X", game_screen.width / 2, game_screen.height / 90,
+                             True)
+        create_onscreen_text(medium_font, white, "by Benndot", game_screen.width / 2, game_screen.height / 13,
+                             True)
 
         start_button = create_text_button(medium_font, black, "Start", game_screen.width * .15, game_screen.height *
                                           0.02, green, lighter_green, True)
@@ -340,7 +360,8 @@ def main_menu():
 
         game_screen.screen.fill((230, 60, 160))
 
-        create_onscreen_text(large_font, black, greeting_message, game_screen.width / 2.5, game_screen.height * 0.05)
+        create_onscreen_text(large_font, black, greeting_message, game_screen.width / 2, game_screen.height * 0.05,
+                             True)
 
         create_onscreen_text(medium_font, black, f"Wins: {DataTracker.wins.value}", game_screen.width / 15,
                              game_screen.height * 0.9)
@@ -378,8 +399,8 @@ def replays_menu():
 
         game_screen.screen.fill((30, 105, 230))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
@@ -406,8 +427,8 @@ def symbol_selection():
 
         game_screen.screen.fill((55, 195, 120))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
@@ -434,8 +455,8 @@ def save_settings():
 
         game_screen.screen.fill((85, 165, 180))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
@@ -456,6 +477,8 @@ def sound_menu():
 
     title_text = large_font.render("Options Menu", True, blackish)
 
+    volume_controls_height = game_screen.height / 2.8
+
     while True:
         game_screen.screen.fill(thistle_green)
         game_screen.screen.blit(title_text, ((game_screen.width - title_text.get_width()) / 2, 0))
@@ -467,21 +490,17 @@ def sound_menu():
 
         # Bool declaration
         music_pause_declaration = "Yes" if music_object.music_paused else "No"
-        music_paused_text = medium_font.render(f"Music Paused: " + music_pause_declaration, True, blackish)
-        bool_text_x = (game_screen.width - music_paused_text.get_width()) / 2
-        bool_text_y = (game_screen.height - music_paused_text.get_height()) / 3.8
-        game_screen.screen.blit(music_paused_text, (bool_text_x, bool_text_y))
+        create_onscreen_text(medium_font, black, f"Music Paused: " + music_pause_declaration, game_screen.width / 2,
+                             game_screen.height / 3.8, True)
 
-        volume_height = game_screen.height / 2.8
-        volume_text = medium_font.render(f"{music_object.volume_level}", True, black)
-        volume_text_x = (game_screen.width / 2) - (volume_text.get_width() / 2) + 5
-        game_screen.screen.blit(volume_text, (volume_text_x, volume_height - 10))
+        create_onscreen_text(medium_font, black, f"{music_object.volume_level}", game_screen.width / 2,
+                             volume_controls_height - 15, True)
 
-        volume_up_button = create_text_button(small_font, white, "Volume +", game_screen.width / 2.25,
-                                              volume_height, slategray, lightgray, True)
+        volume_up_button = create_text_button(small_font, white, "Volume +", game_screen.width / 2.3,
+                                              volume_controls_height, slategray, lightgray, True)
 
         volume_down_button = create_text_button(small_font, white, "Volume -", game_screen.width / 1.75,
-                                                volume_height, slategray, lightgray, True)
+                                                volume_controls_height, slategray, lightgray, True)
 
         if volume_up_button:
             print("volume increased!")
@@ -491,19 +510,19 @@ def sound_menu():
             music_object.change_music_volume(-10)
 
         if music_object.volume_level == 0:
-            muted_text = medium_font.render("(muted)", True, thunderbird_red)
-            game_screen.screen.blit(muted_text, (volume_text_x * .92, volume_height + 25))
+            create_onscreen_text(medium_font, thunderbird_red, "(muted)", game_screen.width / 2,
+                                 volume_controls_height + 25, True)
 
         music_changer = create_text_button(intermediate_font, white, "Change Music Track", game_screen.width / 2,
-                                           game_screen.height / 2.2, slategray, lightgray, True)
+                                           game_screen.height / 2, slategray, lightgray, True)
 
         if music_changer:
             print("Track change initiated")
             music_object.cycle_track()
 
         current_track_name = music_object.tracklist[music_object.current_track_index][6:-4]
-        current_track_text = sml_med_font.render(f'Current Track: ' + current_track_name, True, blackish)
-        game_screen.screen.blit(current_track_text, (game_screen.width / 6, game_screen.height / 1.6))
+        create_onscreen_text(sml_med_font, blackish, f"Current Track: {current_track_name}", game_screen.width / 2,
+                             game_screen.height / 1.6, True)
 
         # Return to start menu button
         return_button = create_text_button(intermediate_font, white, "Return", game_screen.width / 2,
@@ -525,7 +544,6 @@ def sound_menu():
 
 
 def mode_selection():
-    # Initialize list here, so deleted custom mode values can be updated, and since nowhere else uses this anyway
 
     while True:
         game_screen.screen.fill((100, 200, 200))
@@ -589,7 +607,7 @@ def coin_flip():
 
         game_screen.screen.fill((90, 130, 50))
 
-        create_onscreen_text(medium_font, white, coin_flip_text, game_screen.width/20, game_screen.height * 0.08)
+        create_onscreen_text(medium_font, white, coin_flip_text, game_screen.width/2, game_screen.height * 0.08, True)
 
         heads_button = create_text_button(intermediate_font, black, "HEADS", game_screen.width/7, game_screen.height *
                                           0.2, lighter_red if not flip_choice_made else slategray,
@@ -655,7 +673,7 @@ def pre_game_rules(flip_status):
 
     pre_game_message = f"{winner} won the coin toss and will be going first!"
 
-    game_rules = f"{GameHandler.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
+    game_rules = f" {GameHandler.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
                  f"{GameHandler.current_mode.board.shape[0]} by {GameHandler.current_mode.board.shape[1]} board. " \
                  f"The goal of the game is to align {GameHandler.current_mode.objective} of your characters in a row " \
                  f"anywhere on the board_shape before your opponent does. If the board fills up before either player " \
@@ -664,10 +682,11 @@ def pre_game_rules(flip_status):
     while True:
         game_screen.screen.fill((90, 110, 150))
 
-        create_onscreen_text(sml_med_font, white, pre_game_message, game_screen.width / 5, game_screen.height / 17)
+        create_onscreen_text(sml_med_font, white, pre_game_message, game_screen.width / 2, game_screen.height / 17,
+                             True)
 
-        create_onscreen_text(sml_med_font, white, "Would you like to hear the rules?", game_screen.width / 5,
-                             game_screen.height / 9)
+        create_onscreen_text(sml_med_font, white, "Would you like to hear the rules?", game_screen.width / 2,
+                             game_screen.height / 9, True)
 
         yes_button = create_text_button(intermediate_font, black, "YES", game_screen.width / 4, game_screen.height *
                                         0.2, lighter_red if not rules_choice_made else slategray,
@@ -687,24 +706,11 @@ def pre_game_rules(flip_status):
                 rules_choice_made = True
 
         if display_rules:
-            entry_x = game_screen.width / 4
-            start_index = 0
-            height_offset = 1
-            index_counter = 0
-            for index, char in enumerate(game_rules):
-                index_counter += 1
-                if char == " " and index_counter >= 50:
-                    end_index = index + 1
-                    create_onscreen_text(sml_med_font, black, game_rules[start_index: end_index],
-                                         entry_x,
-                                         game_screen.height * 0.4 * height_offset)
-                    height_offset += 0.15
-                    start_index = index
-                    index_counter = 0
-                if index >= len(game_rules) - 1:
-                    create_onscreen_text(sml_med_font, black, game_rules[start_index: -1],
-                                         entry_x, game_screen.height * 0.4 * height_offset)
-                    break
+            display_text_over_multiple_lines(game_rules, sml_med_font, 50, game_screen.width / 4,
+                                             game_screen.height * 0.4, 0.15)
+        if not display_rules and rules_choice_made:
+            create_onscreen_text(sml_med_font, black, "Fine, be that way...", game_screen.width / 4,
+                                 game_screen.height * 0.4)
 
         proceed_button = create_text_button(large_font, black, "Proceed To The Game", game_screen.width/2,
                                             game_screen.height*0.8, (90, 90, 255), (90, 90, 180), True)
@@ -733,9 +739,10 @@ def connect_game():
 
         game_screen.screen.fill(thistle_green)
 
-        create_onscreen_text(intermediate_font, (0, 200, 0), "Player Turn", game_screen.width / 2.5,
-                             game_screen.height * 0.01) if GameHandler.player_turn else \
-            create_onscreen_text(intermediate_font, red, "CPU Turn", game_screen.width / 2.5, game_screen.height * 0.01)
+        create_onscreen_text(intermediate_font, (0, 200, 0), "Player Turn", game_screen.width / 2,
+                             game_screen.height * 0.01, True) if GameHandler.player_turn else \
+            create_onscreen_text(intermediate_font, red, "CPU Turn", game_screen.width / 2, game_screen.height * 0.01,
+                                 True)
 
         music_toggle = create_text_button(small_font, thunderbird_red, "Toggle Music", game_screen.width * .86,
                                           game_screen.height * 0.90, blackish, black, False)
@@ -793,8 +800,8 @@ def post_game():
 
         game_screen.screen.fill((55, 195, 120))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 3, game_screen.height * 0.05)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 3, game_screen.height * 0.20)
+        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
+        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
