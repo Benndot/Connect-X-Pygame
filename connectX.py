@@ -607,6 +607,8 @@ def coin_flip():
                 player_call = "Tails"
 
         if heads_button or tails_button:
+            coin_sound = mixer.Sound('audio/coin-flip.wav')
+            mixer.Sound.play(coin_sound)
             coin_flip_result = random.choice(["Heads", "Tails"])
 
         if not flip_choice_made:
@@ -772,6 +774,17 @@ def post_game():
     header_message = f"You have {GameHandler.game_status} the game!"
 
     greeting = "Go Away"
+
+    win_sound = mixer.Sound("audio/win.wav")
+    lose_sound = mixer.Sound("audio/lose.wav")
+    tie_sound = mixer.Sound("audio/tie.mp3")
+
+    if GameHandler.game_status == "won":
+        mixer.Sound.play(win_sound)
+    elif GameHandler.game_status == "lost":
+        mixer.Sound.play(lose_sound)
+    elif GameHandler.game_status == "tied":
+        mixer.Sound.play(tie_sound)
 
     while True:
 
