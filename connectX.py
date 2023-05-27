@@ -87,6 +87,7 @@ class GameScreen:
 game_screen = GameScreen()
 
 # Setting different sized font options to be used later for general text and button labels
+xxl_font = pygame.font.SysFont("comicsansms", math.ceil(game_screen.height * 0.0695 * 1.4))
 xl_font = pygame.font.SysFont("comicsansms", math.ceil(game_screen.height * 0.0695 * 1.2))
 large_font = pygame.font.SysFont("comicsansms", math.ceil(game_screen.height * 0.0695))
 intermediate_font = pygame.font.SysFont("comicsansms", math.ceil(game_screen.height * 0.0695 * 0.8))
@@ -168,6 +169,7 @@ class GameMode:
     cell_y_offset: float = float(0.12)  # A multiplier for determining a cell's generated position
     x_offset_step: float = float(0.1)  # The space multiplier that separates each cell as they're generated
     y_offset_step: float = float(0.15)
+    font: pygame.font = large_font
 
 
 connect4 = GameMode("Connect4", np.full((6, 7), "-"), 4, cell_width=float(game_screen.width / 11),
@@ -184,7 +186,8 @@ tall_boi = GameMode("Tall Boi", np.full((8, 4), "-"), 4)
 
 tic_tac_toe = GameMode("Tic-Tac-Toe", np.full((3, 3), "-"), 3, cell_width=float(game_screen.width / 6.5),
                        cell_height=float(game_screen.height / 5), x_offset_step=float(0.16),
-                       y_offset_step=float(0.22), cell_x_offset=float(0.24))
+                       y_offset_step=float(0.22), cell_x_offset=float(0.24),
+                       font=xl_font)
 
 cheese_crackers = GameMode("Cheese & Crackers", np.full((5, 5), "-"), 4)
 
@@ -322,7 +325,7 @@ def title_screen():
 
 def main_menu():
 
-    greeting_message = "Main Menu!"
+    greeting_message = "Main Menu"
 
     play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
@@ -858,7 +861,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             pygame.draw.rect(game_screen.screen, black, outline_rect, int(game_screen.height / 360))
 
     def draw_cell_value(self):
-        create_onscreen_text(large_font, black, self.value, self.x + (self.width / 3),
+        create_onscreen_text(GameHandler.current_mode.font, black, self.value, self.x + (self.width / 3),
                              self.y + (self.height / 6))
 
 
