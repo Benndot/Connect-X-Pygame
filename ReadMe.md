@@ -31,7 +31,7 @@ eventually. The board resets after a game ends, so the game loop is now fully fu
 
 Create a pause between win/loss/tie move and the user being brought the post-game screen
 
-In-game music menu should return user to the connectX game rather than the title screen
+win / loss / tie sound effects or jingles
 
 Sound effects for hovering and clicking cells during the opponents turn
 

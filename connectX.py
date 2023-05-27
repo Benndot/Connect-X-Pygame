@@ -260,7 +260,7 @@ class GameHandler:
     enemy_turn_start_time = 1  # Will contain the pygame.time.getticks() of when the CPU's turn began
     time_taken = False  # Bool to show that the enemy_turn_start_time was taken
 
-    game_status: str = "ongoing"  # Options are ongoing, won, lost, tied
+    game_status: str = "pregame"  # Options are pregame, ongoing, won, lost, tied
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -309,11 +309,6 @@ def title_screen():
         if music_button:
             music_object.music_toggle()
 
-        ghost_button = create_transparent_button(250, 100, game_screen.width / 1.75, game_screen.height / 2.8)
-
-        if ghost_button:
-            print("ghost")
-
         game_screen.screen.blit(title_image, (0, nav_bar_height))
 
         for evnt in pygame.event.get():
@@ -334,7 +329,7 @@ def main_menu():
     stats_replays_str = {"Stats and Replays": replays_menu}
     audio_options = {"Audio Options": sound_menu}
     save_options_str = {"Save File Options": save_settings}
-    quit_game_str = {"Quit GameHandler": sys.exit}
+    quit_game_str = {"Quit": sys.exit}
 
     menu_options = [play_game_str, change_symbol_str, stats_replays_str, audio_options, save_options_str, quit_game_str]
 
@@ -508,11 +503,14 @@ def sound_menu():
         game_screen.screen.blit(current_track_text, (game_screen.width / 6, game_screen.height / 1.6))
 
         # Return to start menu button
-        return_button = create_text_button(medium_font, white, "Return To Start", game_screen.width / 2,
+        return_button = create_text_button(intermediate_font, white, "Return", game_screen.width / 2,
                                            game_screen.height / 1.25, slategray, lightgray, True)
 
         if return_button:
-            title_screen()
+            if GameHandler.game_status == "pregame":
+                main_menu()
+            elif GameHandler.game_status == "ongoing":
+                connect_game()
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -703,8 +701,8 @@ def pre_game_rules(flip_status):
                                          entry_x, game_screen.height * 0.4 * height_offset)
                     break
 
-        proceed_button = create_text_button(large_font, black, "Proceed To The GameHandler", game_screen.width/2,
-                                            game_screen.height*0.8, (0, 0, 255), (0, 0, 180), True)
+        proceed_button = create_text_button(large_font, black, "Proceed To The Game", game_screen.width/2,
+                                            game_screen.height*0.8, (90, 90, 255), (90, 90, 180), True)
 
         if proceed_button:
             connect_game()
@@ -719,6 +717,8 @@ def pre_game_rules(flip_status):
 
 
 def connect_game():
+
+    GameHandler.game_status = "ongoing"
 
     GameHandler.player_turn = True if GameHandler.priority else False
 
@@ -756,7 +756,6 @@ def connect_game():
 
         for symbol in [GameHandler.player_symbol, GameHandler.enemy_symbol]:
             win_loss_check(symbol)
-        tie_check()  # Checking for ties (other end-game checks coming later)
 
         if not GameHandler.player_turn:
             if not GameHandler.time_taken:
@@ -764,7 +763,7 @@ def connect_game():
                 GameHandler.time_taken = True
             enemy_turn()
 
-        if GameHandler.game_status != "ongoing":
+        if GameHandler.game_status in ["won", "lost", "tied"]:
             post_game()
 
 
@@ -910,7 +909,7 @@ def enemy_turn():
             GameHandler.time_taken = False
             return
         else:
-            enemy_turn()
+            enemy_turn()  # Recurse
 
 
 def tie_check():
@@ -939,8 +938,10 @@ def win_loss_check(symbol):
                 print("Victory condition reached (row)")
                 if symbol == GameHandler.player_symbol:
                     GameHandler.game_status = "won"
+                    return
                 if symbol == GameHandler.enemy_symbol:
                     GameHandler.game_status = "lost"
+                    return
 
     # Checking columns
     column_count = 0
@@ -955,8 +956,10 @@ def win_loss_check(symbol):
                 print("Victory condition reached (column)")
                 if symbol == GameHandler.player_symbol:
                     GameHandler.game_status = "won"
+                    return
                 if symbol == GameHandler.enemy_symbol:
                     GameHandler.game_status = "lost"
+                    return
 
         column_count += 1
 
@@ -984,8 +987,10 @@ def win_loss_check(symbol):
                             print("Victory condition reached (forward diagonal)")
                             if symbol == GameHandler.player_symbol:
                                 GameHandler.game_status = "won"
+                                return
                             if symbol == GameHandler.enemy_symbol:
                                 GameHandler.game_status = "lost"
+                                return
                     else:
                         break
 
@@ -1013,11 +1018,15 @@ def win_loss_check(symbol):
                             print("Victory condition reached (forward diagonal)")
                             if symbol == GameHandler.player_symbol:
                                 GameHandler.game_status = "won"
+                                return
                             if symbol == GameHandler.enemy_symbol:
                                 GameHandler.game_status = "lost"
+                                return
 
                     else:
                         break
+
+    tie_check()
 
 
 def post_game_reset():
@@ -1030,7 +1039,7 @@ def post_game_reset():
         DataTracker.ties.value += 1
 
     grid_manager.grid = []
-    GameHandler.game_status = "ongoing"
+    GameHandler.game_status = "pregame"
 
 # ----------------------------------------------------------------------------------------------------------------------
 
