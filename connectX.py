@@ -418,8 +418,7 @@ def replays_menu():
                 if replay.name != "Empty":
                     button_click = mixer.Sound("audio/button_click.mp3")
                     mixer.Sound.play(button_click)
-                    grid_manager.generate_replay_grid(replay)  # Setting up the grid
-                    replay_player()
+                    replay_player(replay)
                 else:
                     denial_sound = mixer.Sound("audio/rejection.wav")
                     mixer.Sound.play(denial_sound)
@@ -439,9 +438,11 @@ def replays_menu():
         clock.tick(15)
 
 
-def replay_player():
+def replay_player(replay):
 
     move_list_index = 0
+
+    grid_manager.generate_replay_grid(replay)  # Setting up the grid
 
     while True:
 
@@ -454,6 +455,11 @@ def replay_player():
 
         if progress_button:
             print("Progress board 1 turn further")
+            try:
+                print(replay.player_moves[move_list_index])
+                print(replay.enemy_moves[move_list_index])
+            except IndexError:
+                print("Something went wrong")
 
         ff_button = create_text_button(medium_font, black, "Fast-Forward", game_screen.width / 65,
                                        game_screen.height * 0.88, slategray, lightgray, False, True)
@@ -1104,7 +1110,7 @@ def enemy_turn():
             mixer.Sound.play(stamp_sound)
 
             cell_choice.value = GameHandler.enemy_symbol
-            DataTracker.enemy_move_list.append(cell_choice)
+            DataTracker.enemy_move_list.append(cell_choice.cid)
             print(f"The enemy has successfully selected cell {cell_choice.cid}!")
             GameHandler.player_turn = True
             GameHandler.time_taken = False
