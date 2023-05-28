@@ -151,7 +151,8 @@ def create_transparent_button(width, height, x, y):
                 return True
 
 
-def create_text_button(font_choice, text_color, msg, x, y, hover_color, default_color, x_adjust: bool):
+def create_text_button(font_choice, text_color, msg, x, y, hover_color, default_color, x_adjust: bool,
+                       click_sound: bool = True):
 
     mouse = pygame.mouse.get_pos()
 
@@ -168,6 +169,9 @@ def create_text_button(font_choice, text_color, msg, x, y, hover_color, default_
         pygame.draw.rect(game_screen.screen, hover_color, (x, y, button_width, button_height))
         for evnt in pygame.event.get():
             if evnt.type == pygame.MOUSEBUTTONUP:
+                if click_sound:
+                    button_effect = mixer.Sound('audio/click_v2.mp3')
+                    mixer.Sound.play(button_effect)
                 return True
     else:
         pygame.draw.rect(game_screen.screen, default_color, (x, y, button_width, button_height))
@@ -612,7 +616,7 @@ def coin_flip():
 
         heads_button = create_text_button(intermediate_font, black, "HEADS", game_screen.width/7, game_screen.height *
                                           0.2, lighter_red if not flip_choice_made else slategray,
-                                          red if not flip_choice_made else slategray, False)
+                                          red if not flip_choice_made else slategray, False, False)
 
         if heads_button:
             if not flip_choice_made:
@@ -621,7 +625,7 @@ def coin_flip():
 
         tails_button = create_text_button(intermediate_font, black, "TAILS", game_screen.width / 2.6, game_screen.height
                                           * 0.2, lighter_red if not flip_choice_made else slategray,
-                                          red if not flip_choice_made else slategray, False)
+                                          red if not flip_choice_made else slategray, False, False)
 
         if tails_button:
             if not flip_choice_made:
@@ -807,6 +811,12 @@ def post_game():
         replay_button = create_text_button(medium_font, black, "Save Replay?", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
         if replay_button:
+            print("Player Moves: ")
+            print(DataTracker.player_move_list)
+            print("-"*100)
+            print("Enemy Moves: ")
+            print(DataTracker.enemy_move_list)
+            print("-"*100)
             create_onscreen_text(medium_font, black, "Nope", game_screen.width / 2, game_screen.height * 0.65, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
@@ -914,10 +924,11 @@ class GridManager:
                 if cell.value:
                     cell.draw_cell_value()
                 if physical_cell and GameHandler.player_turn:
-                    print("A cell has been claimed!")
+                    print(f"The player has claimed a cell! ({cell.cid})")
                     stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
                     mixer.Sound.play(stamp_sound)
                     cell.value = GameHandler.player_symbol
+                    DataTracker.player_move_list.append(cell.cid)
                     GameHandler.player_turn = False
 
 
@@ -940,7 +951,7 @@ def enemy_turn():
             mixer.Sound.play(stamp_sound)
 
             cell_choice.value = GameHandler.enemy_symbol
-
+            DataTracker.enemy_move_list.append(cell_choice)
             print(f"The enemy has successfully selected cell {cell_choice.cid}!")
             GameHandler.player_turn = True
             GameHandler.time_taken = False
@@ -1076,6 +1087,8 @@ def post_game_reset():
         DataTracker.ties.value += 1
 
     grid_manager.grid = []
+    DataTracker.player_move_list = []
+    DataTracker.enemy_move_list = []
     GameHandler.game_status = "pregame"
 
 # ----------------------------------------------------------------------------------------------------------------------

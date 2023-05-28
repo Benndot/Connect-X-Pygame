@@ -30,15 +30,15 @@ functional.
  
 ### TODO
 
-Create a pause between win/loss/tie move and the user being brought the post-game screen
+Create a short pause between win/loss/tie move and the user being brought the post-game screen
 
-Polish/complete the pre-game / rules display screen, particularly the "no" option
-
-More advanced enemy AI features
+implement symbol selection
 
 implement basic save file features
 
 create replays and replay saving system
 
-keep on making variable cell sizes/spacing based on the amount of squares to render (aka the size of the board)
+More advanced enemy AI features
+
+Create more viable game modes by properly sizing cells based on the amount of space available
 
