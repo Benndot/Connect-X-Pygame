@@ -444,9 +444,16 @@ def replay_player(replay):
 
     grid_manager.generate_replay_grid(replay)  # Setting up the grid
 
+    replay_complete = False
+
     while True:
 
         game_screen.screen.fill((210, 90, 55))
+
+        create_onscreen_text(large_font, black, f"Turn {move_list_index + 1}", game_screen.width / 2,
+                             game_screen.height / 50, True) if not replay_complete else \
+            create_onscreen_text(large_font, black, f"Complete", game_screen.width / 2,
+                                 game_screen.height / 50, True)
 
         grid_manager.blit_grid()
 
@@ -455,11 +462,25 @@ def replay_player(replay):
 
         if progress_button:
             print("Progress board 1 turn further")
-            try:
-                print(replay.player_moves[move_list_index])
-                print(replay.enemy_moves[move_list_index])
-            except IndexError:
-                print("Something went wrong")
+
+            def cycle_turns(first_moves, second_moves, first_symbol, second_symbol):
+
+                symbols = [first_symbol, second_symbol]
+
+                for index, move_list in enumerate([first_moves, second_moves]):
+                    try:
+                        move_coords = move_list[move_list_index]
+                        print(move_coords)
+                        grid_manager.grid[move_coords[0]][move_coords[1]].value = symbols[index]
+                    except IndexError:
+                        print("This turn doesn't exist")
+                        return True
+                return False
+
+            replay_complete = cycle_turns(replay.player_moves, replay.enemy_moves, replay.player_symbol,
+                                          replay.enemy_symbol) if replay.priority else \
+                cycle_turns(replay.enemy_moves, replay.player_moves, replay.enemy_symbol, replay.player_symbol)
+            move_list_index += 1
 
         ff_button = create_text_button(medium_font, black, "Fast-Forward", game_screen.width / 65,
                                        game_screen.height * 0.88, slategray, lightgray, False, True)
@@ -696,7 +717,7 @@ def mode_selection():
         back_button = create_text_button(medium_font, black, "Back", game_screen.width * .8,
                                          game_screen.height * 0.02, (250, 0, 0), (180, 0, 0), True)
         if back_button:
-            main()
+            main_menu()
 
         music_button = create_text_button(small_font, blackish, "Toggle Music", game_screen.width * .925,
                                           game_screen.height * 0.035, lightgray, slategray, True)

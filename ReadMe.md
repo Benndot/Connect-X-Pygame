@@ -30,8 +30,9 @@ actions on this grid have sound effects associated with them as well. Upon the u
 is filled with the user's symbol. The CPU for their part, randomly selects their own square during their turn. Win and 
 tie checks are then run to determine if either player has won. 
 
-If the win / tie check comes up positive, the user is brought to a post-game screen where the user will eventually 
-be able to save replays, resets are conducted on the game logic, and the user can return to the main menu to play again.
+If the win / tie check comes up positive, the user is brought to a post-game screen where the user can choose to save 
+a replay of their game, which they can replay in the replay menu accessible from the main menu. Resets are afterward
+conducted on the game logic, and the user can return to the main menu to play again indefinitely.
 
 ---
 
@@ -47,7 +48,9 @@ confirmed with a button press.
  
 ### TODO
 
-Create replay playback and replay deleting feature
+add time delay between replay playback turns
+
+Create replay deleting feature
 
 implement basic save file features
 
