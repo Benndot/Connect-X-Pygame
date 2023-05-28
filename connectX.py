@@ -398,14 +398,15 @@ def replays_menu():
         game_screen.screen.fill((30, 105, 230))
 
         create_onscreen_text(large_font, black, "Replays Menu", game_screen.width / 2, game_screen.height * 0.05, True)
-        create_onscreen_text(large_font, black, "Go Away", game_screen.width / 2, game_screen.height * 0.20, True)
 
+        height_multiplier = 1
         for replay in ReplayManager.replay_list:
-            create_onscreen_text(medium_font, black, replay.__str__(), game_screen.width / 2, game_screen.height * 0.40,
-                                 True)
+            create_onscreen_text(medium_font, black, replay.__str__(), game_screen.width / 2,
+                                 game_screen.height * 0.25 * height_multiplier, True)
+            height_multiplier += 0.35
 
         return_button = create_text_button(medium_font, black, "Return", game_screen.width / 2,
-                                           game_screen.height * 0.75, slategray, lightgray, True)
+                                           game_screen.height * 0.85, slategray, lightgray, True)
 
         if return_button:
             main_menu()
@@ -803,8 +804,13 @@ def post_game():
         create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
         create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
-        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+        replay_button = create_text_button(medium_font, black, "Save Replay?", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)
+        if replay_button:
+            create_onscreen_text(medium_font, black, "Nope", game_screen.width / 2, game_screen.height * 0.65, True)
+
+        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
+                                           game_screen.height * 0.8, slategray, lightgray, True)
 
         if return_button:
             post_game_reset()
