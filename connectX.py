@@ -85,6 +85,9 @@ class GameScreen:
 
 
 game_screen = GameScreen()
+pygame.display.set_caption("Benndot's Connect X")
+connect_icon = pygame.image.load("images/connect.png")
+pygame.display.set_icon(connect_icon)
 
 # Setting different sized font options to be used later for general text and button labels
 xxl_font = pygame.font.SysFont("comicsansms", math.ceil(game_screen.height * 0.0695 * 1.4))
@@ -416,12 +419,50 @@ def replays_menu():
                     print("Nice!")
                     button_click = mixer.Sound("audio/button_click.mp3")
                     mixer.Sound.play(button_click)
+                    replay_player()
                 else:
                     denial_sound = mixer.Sound("audio/rejection.wav")
                     mixer.Sound.play(denial_sound)
 
         return_button = create_text_button(medium_font, black, "Return", game_screen.width / 2,
                                            game_screen.height * 0.85, slategray, lightgray, True)
+
+        if return_button:
+            main_menu()
+
+        for evnt in pygame.event.get():
+            if evnt.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+def replay_player():
+
+    move_list_index = 0
+
+    while True:
+
+        game_screen.screen.fill((210, 90, 55))
+
+        progress_button = create_text_button(intermediate_font, black, "Progress", game_screen.width / 2,
+                                             game_screen.height * 0.88, slategray, lightgray, True, True)
+
+        if progress_button:
+            print("Progress board 1 turn further")
+            main_menu()
+
+        ff_button = create_text_button(medium_font, black, "Return", game_screen.width / 90,
+                                       game_screen.height * 0.88, slategray, lightgray, True, True)
+
+        if ff_button:
+            print("Fast-forward")
+            main_menu()
+
+        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.1,
+                                           game_screen.height * 0.88, slategray, lightgray, True, True)
 
         if return_button:
             main_menu()
