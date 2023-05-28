@@ -426,19 +426,37 @@ def replays_menu():
 
 def symbol_selection():
 
-    header_message = "Symbol Menu"
+    player_symbol_var = "H"  # Empty string that will hold the user's input
+    player_box_active = False
+    player_var_x = game_screen.width * 0.28
 
-    greeting = "Go Away"
+    var_y = game_screen.height * 0.4
+
+    enemy_symbol_var = "T"  # Empty string that will hold the user's input
+    enemy_box_active = False
+    enemy_var_x = game_screen.width * 0.68
+
+    example_surface = xl_font.render("A", True, black)
 
     while True:
 
         game_screen.screen.fill((55, 195, 120))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
+        create_onscreen_text(large_font, black, "Symbol Select", game_screen.width / 2, game_screen.height * 0.05, True)
+
+        create_onscreen_text(medium_font, black, "Player", player_var_x * 0.96, game_screen.height * 0.3)
+        create_onscreen_text(medium_font, black, "CPU", enemy_var_x * 0.99, game_screen.height * 0.3)
+
+        create_onscreen_text(xl_font, black, player_symbol_var, player_var_x, var_y)
+        create_onscreen_text(xl_font, black, enemy_symbol_var, enemy_var_x, var_y)
+
+        player_box_border = pygame.Rect(player_var_x - (game_screen.height / 72), var_y, example_surface.get_width() +
+                                        24, example_surface.get_height() + 16)
+        enemy_box_border = pygame.Rect(enemy_var_x - (game_screen.height / 72), var_y, example_surface.get_width() +
+                                       24, example_surface.get_height() + 16)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
-                                           game_screen.height * 0.5, slategray, lightgray, True)
+                                           game_screen.height * 0.8, slategray, lightgray, True)
 
         if return_button:
             main_menu()
@@ -447,6 +465,39 @@ def symbol_selection():
             if evnt.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if evnt.type == pygame.MOUSEBUTTONDOWN:
+                if player_box_border.collidepoint(evnt.pos):
+                    player_box_active = not player_box_active
+                    if player_box_active and enemy_box_active:
+                        enemy_box_active = not enemy_box_active
+                if enemy_box_border.collidepoint(evnt.pos):
+                    enemy_box_active = not enemy_box_active
+                    if enemy_box_active and player_box_active:
+                        player_box_active = not player_box_active
+
+            if evnt.type == pygame.KEYDOWN:
+
+                if player_box_border:
+                    if evnt.key == pygame.K_BACKSPACE:
+                        player_symbol_var = ""
+                    else:
+                        player_symbol_var = evnt.unicode
+
+                if enemy_box_border:
+                    if evnt.key == pygame.K_BACKSPACE:
+                        enemy_symbol_var = ""
+                    else:
+                        enemy_symbol_var = evnt.unicode
+
+        if player_box_active:
+            pygame.draw.rect(game_screen.screen, white, player_box_border, 2)
+        else:
+            pygame.draw.rect(game_screen.screen, slategray, player_box_border, 2)
+
+        if enemy_box_active:
+            pygame.draw.rect(game_screen.screen, white, enemy_box_border, 2)
+        else:
+            pygame.draw.rect(game_screen.screen, slategray, enemy_box_border, 2)
 
         pygame.display.update()
         clock.tick(15)
