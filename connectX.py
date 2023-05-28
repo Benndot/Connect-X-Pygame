@@ -406,9 +406,19 @@ def replays_menu():
 
         height_multiplier = 1
         for replay in ReplayManager.replay_list:
-            create_onscreen_text(medium_font, black, replay.__str__(), game_screen.width / 2,
-                                 game_screen.height * 0.25 * height_multiplier, True)
+            replay_button = create_text_button(medium_font, black, replay.__str__(), game_screen.width / 2,
+                                               game_screen.height * 0.25 * height_multiplier, lightgray, slategray,
+                                               True, False)
             height_multiplier += 0.35
+
+            if replay_button:
+                if replay.name != "Empty":
+                    print("Nice!")
+                    button_click = mixer.Sound("audio/button_click.mp3")
+                    mixer.Sound.play(button_click)
+                else:
+                    denial_sound = mixer.Sound("audio/rejection.wav")
+                    mixer.Sound.play(denial_sound)
 
         return_button = create_text_button(medium_font, black, "Return", game_screen.width / 2,
                                            game_screen.height * 0.85, slategray, lightgray, True)
