@@ -229,7 +229,7 @@ class Stat:
 
 @dataclass()
 class Replay:
-    id: str  # Unchanging unique identifier for each replay instance
+    id: int  # Unchanging unique identifier for each replay instance
     name: str  # Name of the replay, can be edited by the user
     game_mode: GameMode  # In which game mode did the game take place
     player_moves: list  # The sequence of moves that the player made
@@ -243,11 +243,13 @@ class Replay:
 
 
 class ReplayManager:
-    r1 = Replay("r1", "Replay", tic_tac_toe, [], [], True, (), 0)
-    r2 = Replay("r2", "Replay", tic_tac_toe, [], [], True, (), 0)
-    r3 = Replay("r3", "Replay", tic_tac_toe, [], [], True, (), 0)
-    r4 = Replay("r4", "Replay", tic_tac_toe, [], [], True, (), 0)
-    r5 = Replay("r5", "Replay", tic_tac_toe, [], [], True, (), 0)
+    r1 = Replay(1, "Empty", tic_tac_toe, [], [], True, (), 0)
+    r2 = Replay(2, "Empty", tic_tac_toe, [], [], True, (), 0)
+    r3 = Replay(3, "Empty", tic_tac_toe, [], [], True, (), 0)
+    r4 = Replay(4, "Empty", tic_tac_toe, [], [], True, (), 0)
+    r5 = Replay(5, "Empty", tic_tac_toe, [], [], True, (), 0)
+
+    replay_list = [r1, r2, r3, r4, r5]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -349,7 +351,7 @@ def main_menu():
 
     play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
-    stats_replays_str = {"Stats and Replays": replays_menu}
+    stats_replays_str = {"Replays": replays_menu}
     audio_options = {"Audio Options": sound_menu}
     save_options_str = {"Save File Options": save_settings}
     quit_game_str = {"Quit": sys.exit}
@@ -391,19 +393,19 @@ def main_menu():
 
 def replays_menu():
 
-    header_message = "Replays Menu"
-
-    greeting = "Go Away"
-
     while True:
 
         game_screen.screen.fill((30, 105, 230))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
+        create_onscreen_text(large_font, black, "Replays Menu", game_screen.width / 2, game_screen.height * 0.05, True)
+        create_onscreen_text(large_font, black, "Go Away", game_screen.width / 2, game_screen.height * 0.20, True)
 
-        return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
-                                           game_screen.height * 0.5, slategray, lightgray, True)
+        for replay in ReplayManager.replay_list:
+            create_onscreen_text(medium_font, black, replay.__str__(), game_screen.width / 2, game_screen.height * 0.40,
+                                 True)
+
+        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 2,
+                                           game_screen.height * 0.75, slategray, lightgray, True)
 
         if return_button:
             main_menu()
@@ -488,7 +490,6 @@ def sound_menu():
         if music_button:
             music_object.music_toggle()
 
-        # Bool declaration
         music_pause_declaration = "Yes" if music_object.music_paused else "No"
         create_onscreen_text(medium_font, black, f"Music Paused: " + music_pause_declaration, game_screen.width / 2,
                              game_screen.height / 3.8, True)
@@ -524,7 +525,6 @@ def sound_menu():
         create_onscreen_text(sml_med_font, blackish, f"Current Track: {current_track_name}", game_screen.width / 2,
                              game_screen.height / 1.6, True)
 
-        # Return to start menu button
         return_button = create_text_button(intermediate_font, white, "Return", game_screen.width / 2,
                                            game_screen.height / 1.25, slategray, lightgray, True)
 
