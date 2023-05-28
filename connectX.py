@@ -426,13 +426,13 @@ def replays_menu():
 
 def symbol_selection():
 
-    player_symbol_var = "H"  # Empty string that will hold the user's input
+    player_symbol_var = f"{GameHandler.player_symbol}"  # Empty string that will hold the user's input
     player_box_active = False
     player_var_x = game_screen.width * 0.28
 
     var_y = game_screen.height * 0.4
 
-    enemy_symbol_var = "T"  # Empty string that will hold the user's input
+    enemy_symbol_var = f"{GameHandler.enemy_symbol}"  # Empty string that will hold the user's input
     enemy_box_active = False
     enemy_var_x = game_screen.width * 0.68
 
@@ -461,6 +461,16 @@ def symbol_selection():
         if return_button:
             main_menu()
 
+        submit_button = create_text_button(medium_font, black, "confirm", game_screen.width / 2,
+                                           game_screen.height * 0.6, slategray, lightgray, True)
+
+        if submit_button:
+            if player_symbol_var != enemy_symbol_var:
+                if len(player_symbol_var) == 1 and player_symbol_var != GameHandler.player_symbol:
+                    GameHandler.player_symbol = player_symbol_var
+                if len(enemy_symbol_var) == 1 and enemy_symbol_var != GameHandler.enemy_symbol:
+                    GameHandler.enemy_symbol = enemy_symbol_var
+
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
                 pygame.quit()
@@ -474,16 +484,21 @@ def symbol_selection():
                     enemy_box_active = not enemy_box_active
                     if enemy_box_active and player_box_active:
                         player_box_active = not player_box_active
+                if not player_box_border.collidepoint(evnt.pos) and not enemy_box_border.collidepoint(evnt.pos):
+                    if enemy_box_active:
+                        enemy_box_active = not enemy_box_active
+                    if player_box_active:
+                        player_box_active = not player_box_active
 
             if evnt.type == pygame.KEYDOWN:
 
-                if player_box_border:
+                if player_box_active:
                     if evnt.key == pygame.K_BACKSPACE:
                         player_symbol_var = ""
                     else:
                         player_symbol_var = evnt.unicode
 
-                if enemy_box_border:
+                if enemy_box_active:
                     if evnt.key == pygame.K_BACKSPACE:
                         enemy_symbol_var = ""
                     else:

@@ -30,15 +30,15 @@ functional.
  
 ### TODO
 
-Create a short pause between win/loss/tie move and the user being brought the post-game screen
-
-implement symbol selection
-
 implement basic save file features
 
 create replays and replay saving system
 
 More advanced enemy AI features
 
+Create a short pause between win/loss/tie move and the user being brought the post-game screen
+
 Create more viable game modes by properly sizing cells based on the amount of space available
+
+confirmation / warning messages for symbol selection confirmation button presses
 
