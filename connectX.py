@@ -416,9 +416,9 @@ def replays_menu():
 
             if replay_button:
                 if replay.name != "Empty":
-                    print("Nice!")
                     button_click = mixer.Sound("audio/button_click.mp3")
                     mixer.Sound.play(button_click)
+                    grid_manager.generate_replay_grid(replay)  # Setting up the grid
                     replay_player()
                 else:
                     denial_sound = mixer.Sound("audio/rejection.wav")
@@ -447,24 +447,25 @@ def replay_player():
 
         game_screen.screen.fill((210, 90, 55))
 
+        grid_manager.blit_grid()
+
         progress_button = create_text_button(intermediate_font, black, "Progress", game_screen.width / 2,
                                              game_screen.height * 0.88, slategray, lightgray, True, True)
 
         if progress_button:
             print("Progress board 1 turn further")
-            main_menu()
 
-        ff_button = create_text_button(medium_font, black, "Return", game_screen.width / 90,
-                                       game_screen.height * 0.88, slategray, lightgray, True, True)
+        ff_button = create_text_button(medium_font, black, "Fast-Forward", game_screen.width / 65,
+                                       game_screen.height * 0.88, slategray, lightgray, False, True)
 
         if ff_button:
             print("Fast-forward")
-            main_menu()
 
-        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.1,
-                                           game_screen.height * 0.88, slategray, lightgray, True, True)
+        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.18,
+                                           game_screen.height * 0.88, slategray, lightgray, False, True)
 
         if return_button:
+            grid_manager.grid = []  # Resetting the grid state
             main_menu()
 
         for evnt in pygame.event.get():
@@ -1045,6 +1046,27 @@ class GridManager:
             print("GameHandler grid is currently empty. Populating...")
             self.grid = grid
 
+    def generate_replay_grid(self, replay):
+        grid: list[list[GridCell]] = []
+        y_offset_factor = replay.game_mode.cell_y_offset
+        for row in range(replay.game_mode.board.shape[0]):
+
+            x_offset_factor = replay.game_mode.cell_x_offset
+            grid_row: list[GridCell] = []
+
+            for col in range(replay.game_mode.board.shape[1]):
+
+                cell = GridCell((row, col), (x_offset_factor, y_offset_factor))
+                grid_row.append(cell)
+                x_offset_factor += replay.game_mode.x_offset_step
+
+            grid.append(grid_row)
+            y_offset_factor += replay.game_mode.y_offset_step
+
+        if not self.grid:
+            print("Generating replay grid...")
+            self.grid = grid
+
     def blit_grid(self):
         if not self.grid:
             print("The game grid does not exist, something went wrong. Resetting.")
@@ -1054,7 +1076,7 @@ class GridManager:
                 physical_cell = cell.generate_cell_on_board()
                 if cell.value:
                     cell.draw_cell_value()
-                if physical_cell and GameHandler.player_turn:
+                if physical_cell and GameHandler.player_turn and GameHandler.game_status == "ongoing":
                     print(f"The player has claimed a cell! ({cell.cid})")
                     stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
                     mixer.Sound.play(stamp_sound)
