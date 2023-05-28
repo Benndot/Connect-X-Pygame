@@ -53,7 +53,7 @@ def obtain_save_value(file, obj):
                 return file[obj.id]
             except KeyError:
                 print(f"SAVE file or key does not exist. Setting replay values to defaults.")
-                return Replay(obj.id, "Replay", tic_tac_toe, [], [], True, (), 0)
+                return Replay(obj.id, "Replay", tic_tac_toe, [], [], True, "X", "O")
 
     if type(obj).__name__ == "GameMode":
         while True:
@@ -239,19 +239,20 @@ class Replay:
     player_moves: list  # The sequence of moves that the player made
     enemy_moves: list  # The sequence of moves that the enemy made
     priority: bool  # Whether player had the priority in the game or not
-    symbols: tuple  # The symbols used in the game (player symbol, enemy symbol)
-    turn_count: int  # The number of turns the game took
+    player_symbol: str
+    enemy_symbol: str
 
     def __str__(self):
-        return f"Replay: {self.name}, Mode: {self.game_mode.title}, Turns: {self.turn_count}"
+        return f"Replay: {self.name}, Mode: {self.game_mode.title}, Turns: " \
+               f"{len(self.player_moves) if len(self.player_moves) >= len(self.enemy_moves) else len(self.enemy_moves)}"
 
 
 class ReplayManager:
-    r1 = Replay(1, "Empty", tic_tac_toe, [], [], True, (), 0)
-    r2 = Replay(2, "Empty", tic_tac_toe, [], [], True, (), 0)
-    r3 = Replay(3, "Empty", tic_tac_toe, [], [], True, (), 0)
-    r4 = Replay(4, "Empty", tic_tac_toe, [], [], True, (), 0)
-    r5 = Replay(5, "Empty", tic_tac_toe, [], [], True, (), 0)
+    r1 = Replay(1, "Empty", tic_tac_toe, [], [], True, "X", "O")
+    r2 = Replay(2, "Empty", tic_tac_toe, [], [], True, "X", "O")
+    r3 = Replay(3, "Empty", tic_tac_toe, [], [], True, "X", "O")
+    r4 = Replay(4, "Empty", tic_tac_toe, [], [], True, "X", "O")
+    r5 = Replay(5, "Empty", tic_tac_toe, [], [], True, "X", "O")
 
     replay_list = [r1, r2, r3, r4, r5]
 
@@ -883,6 +884,19 @@ def post_game():
             print("Enemy Moves: ")
             print(DataTracker.enemy_move_list)
             print("-"*100)
+            for replay in ReplayManager.replay_list:
+                if replay.name == "Empty":
+                    print("Filling empty replay slot...")
+                    replay.name = "filled"
+                    replay.game_mode = GameHandler.current_mode
+                    replay.player_moves = DataTracker.player_move_list
+                    replay.enemy_moves = DataTracker.enemy_move_list
+                    replay.priority = GameHandler.priority
+                    replay.player_symbol = GameHandler.player_symbol
+                    replay.enemy_symbol = GameHandler.enemy_symbol
+                    print("Replay saved!")
+                    break
+
             create_onscreen_text(medium_font, black, "Nope", game_screen.width / 2, game_screen.height * 0.65, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,

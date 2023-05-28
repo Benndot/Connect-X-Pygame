@@ -47,9 +47,9 @@ confirmed with a button press.
  
 ### TODO
 
-implement basic save file features
+Create replay playback and replay deleting feature
 
-create replays and replay saving system
+implement basic save file features
 
 More advanced enemy AI features
 
