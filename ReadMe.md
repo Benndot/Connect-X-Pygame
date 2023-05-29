@@ -52,8 +52,6 @@ question.
  
 ### TODO
 
-add time delay between replay playback turns
-
 implement basic save file features
 
 More advanced enemy AI features

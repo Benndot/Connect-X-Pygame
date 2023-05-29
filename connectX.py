@@ -464,18 +464,29 @@ def replays_menu():
 
 def replay_player(replay):
 
-    move_list_index = 0
+    move_list_index = 0  # This is the proper index of the current turn
 
     grid_manager.generate_replay_grid(replay)  # Setting up the grid
 
-    replay_complete = False
+    replay_complete = False  # True if we have reached the end of one of the move lists
+
+    player_turn = True
+    turn_tracker: int = 0  # Reach 2 (meaning both player's have gone), then reset
 
     while True:
 
         game_screen.screen.fill((210, 90, 55))
 
-        create_onscreen_text(large_font, black, "Start" if move_list_index == 0 else f"Turn {move_list_index}" if not
-                             replay_complete else f"Complete", game_screen.width / 2, game_screen.height / 50, True)
+        create_onscreen_text(large_font, black, "Start" if move_list_index == 0 and turn_tracker == 0 else
+                             f"Turn {move_list_index + 1}" if not replay_complete else f"Complete",
+                             game_screen.width / 2, game_screen.height / 50, True)
+
+        create_onscreen_text(medium_font, black, "Player", game_screen.width * 0.05, game_screen.height * 0.25)
+        create_onscreen_text(medium_font, black, f"{replay.player_symbol}", game_screen.width * 0.05,
+                             game_screen.height * 0.32)
+        create_onscreen_text(medium_font, black, "CPU", game_screen.width * 0.05, game_screen.height * 0.42)
+        create_onscreen_text(medium_font, black, f"{replay.enemy_symbol}", game_screen.width * 0.05,
+                             game_screen.height * 0.50)
 
         grid_manager.blit_grid()
 
@@ -483,26 +494,38 @@ def replay_player(replay):
                                              game_screen.height * 0.88, slategray, lightgray, True, True)
 
         if progress_button:
-            print("Progress board 1 turn further")
+            print("Progress game replay 1 turn")
 
-            def cycle_turns(first_moves, second_moves, first_symbol, second_symbol):
+            def cycle_turn(participant: str):
 
-                symbols = [first_symbol, second_symbol]
-
-                for index, move_list in enumerate([first_moves, second_moves]):
+                if participant == "player":
                     try:
-                        move_coords = move_list[move_list_index]
-                        print(move_coords)
-                        grid_manager.grid[move_coords[0]][move_coords[1]].value = symbols[index]
+                        move_coords = replay.player_moves[move_list_index]
+                        grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.player_symbol
                     except IndexError:
-                        print("This turn doesn't exist")
+                        print("Move does not exist")
+                        return True
+
+                if participant == "enemy":
+                    try:
+                        move_coords = replay.enemy_moves[move_list_index]
+                        grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.enemy_symbol
+                    except IndexError:
+                        print("Move does not exist")
                         return True
                 return False
 
-            replay_complete = cycle_turns(replay.player_moves, replay.enemy_moves, replay.player_symbol,
-                                          replay.enemy_symbol) if replay.priority else \
-                cycle_turns(replay.enemy_moves, replay.player_moves, replay.enemy_symbol, replay.player_symbol)
-            move_list_index += 1
+            if player_turn:
+                replay_complete = cycle_turn('player')
+                player_turn = not player_turn
+            elif not player_turn:
+                cycle_turn("enemy")
+                player_turn = not player_turn
+
+            turn_tracker += 1
+            if turn_tracker == 2:
+                turn_tracker = 0
+                move_list_index += 1
 
         ff_button = create_text_button(medium_font, black, "Fast-Forward", game_screen.width / 65,
                                        game_screen.height * 0.88, slategray, lightgray, False, True)
@@ -1262,7 +1285,7 @@ def win_loss_check(symbol):
                         x -= 1
                         symbol_count += 1
                         if symbol_count == GameHandler.current_mode.objective:
-                            print("Victory condition reached (forward diagonal)")
+                            print("Victory condition reached (backward diagonal)")
                             if symbol == GameHandler.player_symbol:
                                 GameHandler.game_status = "won"
                                 return
