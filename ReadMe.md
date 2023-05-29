@@ -45,20 +45,28 @@ to be found all over the game is various spots, for the sake of convenience.
 The symbol selection screen allows the user to choose which character (letter, number, punctuation) will represent them
 and their opponent in-game. To input boxes exist for this purpose and for the changes to go through, they must be 
 confirmed with a button press. 
+
+The replay menu allows the user to review and delete replays of previous games that they played and chose to save. 
+Clicking on a replay takes them to the replay player, which allows them to cycle through the turns of the replay in
+question. 
  
 ### TODO
 
 add time delay between replay playback turns
 
-Create replay deleting feature
-
 implement basic save file features
 
 More advanced enemy AI features
 
+replay reset button and functionality in the player
+
 Create a short pause between win/loss/tie move and the user being brought the post-game screen
 
-Create more viable game modes by properly sizing cells based on the amount of space available
+### Ideas
+
+highlight winning cells
 
 confirmation / warning messages for symbol selection confirmation button presses
+
+make grids dynamically-sized
 

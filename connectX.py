@@ -401,6 +401,8 @@ def main_menu():
 
 def replays_menu():
 
+    delete_option: bool = False
+
     while True:
 
         game_screen.screen.fill((30, 105, 230))
@@ -412,7 +414,6 @@ def replays_menu():
             replay_button = create_text_button(medium_font, black, replay.__str__(), game_screen.width / 2,
                                                game_screen.height * 0.25 * height_multiplier, lightgray, slategray,
                                                True, False)
-            height_multiplier += 0.35
 
             if replay_button:
                 if replay.name != "Empty":
@@ -423,8 +424,31 @@ def replays_menu():
                     denial_sound = mixer.Sound("audio/rejection.wav")
                     mixer.Sound.play(denial_sound)
 
-        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 2,
-                                           game_screen.height * 0.85, slategray, lightgray, True)
+            if delete_option:
+                delete_button = create_text_button(medium_font, black, "X", game_screen.width * 0.88,
+                                                   game_screen.height * 0.25 * height_multiplier, red, lightgray,
+                                                   True, False)
+
+                if delete_button:
+                    replay.name = "Empty"
+                    replay.game_mode = tic_tac_toe
+                    replay.player_moves = []
+                    replay.enemy_moves = []
+                    replay.priority = False
+                    replay.player_symbol = "X"
+                    replay.enemy_symbol = "O"
+                    print("Replay deleted!")
+
+            height_multiplier += 0.35
+
+        del_options_button = create_text_button(medium_font, black, "Delete Replays?", game_screen.width / 2,
+                                                game_screen.height * 0.85, slategray, lightgray, True)
+
+        if del_options_button:
+            delete_option = True
+
+        return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.2,
+                                           game_screen.height * 0.85, slategray, lightgray, False, True)
 
         if return_button:
             main_menu()
@@ -960,7 +984,7 @@ def post_game():
             for replay in ReplayManager.replay_list:
                 if replay.name == "Empty":
                     print("Filling empty replay slot...")
-                    replay.name = "filled"
+                    replay.name = "Filled"
                     replay.game_mode = GameHandler.current_mode
                     replay.player_moves = DataTracker.player_move_list
                     replay.enemy_moves = DataTracker.enemy_move_list
@@ -971,7 +995,7 @@ def post_game():
                     replay_saved = True
                     break
 
-            create_onscreen_text(medium_font, black, "Nope", game_screen.width / 2, game_screen.height * 0.65, True)
+            create_onscreen_text(medium_font, black, "Done", game_screen.width / 2, game_screen.height * 0.65, True)
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.8, slategray, lightgray, True)
