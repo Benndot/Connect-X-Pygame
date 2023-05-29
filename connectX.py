@@ -450,10 +450,8 @@ def replay_player(replay):
 
         game_screen.screen.fill((210, 90, 55))
 
-        create_onscreen_text(large_font, black, f"Turn {move_list_index + 1}", game_screen.width / 2,
-                             game_screen.height / 50, True) if not replay_complete else \
-            create_onscreen_text(large_font, black, f"Complete", game_screen.width / 2,
-                                 game_screen.height / 50, True)
+        create_onscreen_text(large_font, black, "Start" if move_list_index == 0 else f"Turn {move_list_index}" if not
+                             replay_complete else f"Complete", game_screen.width / 2, game_screen.height / 50, True)
 
         grid_manager.blit_grid()
 
@@ -934,7 +932,7 @@ def post_game():
 
     header_message = f"You have {GameHandler.game_status} the game!"
 
-    greeting = "Go Away"
+    replay_saved = False
 
     win_sound = mixer.Sound("audio/win.wav")
     lose_sound = mixer.Sound("audio/lose.wav")
@@ -952,17 +950,13 @@ def post_game():
         game_screen.screen.fill((55, 195, 120))
 
         create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
 
-        replay_button = create_text_button(medium_font, black, "Save Replay?", game_screen.width / 2,
-                                           game_screen.height * 0.5, slategray, lightgray, True)
-        if replay_button:
-            print("Player Moves: ")
-            print(DataTracker.player_move_list)
-            print("-"*100)
-            print("Enemy Moves: ")
-            print(DataTracker.enemy_move_list)
-            print("-"*100)
+        replay_button = create_text_button(intermediate_font, black if not replay_saved else white,
+                                           "Save Replay?" if not replay_saved else "Saved",
+                                           game_screen.width / 2, game_screen.height * 0.4,
+                                           slategray if not replay_saved else black,
+                                           lightgray if not replay_saved else black, True)
+        if replay_button and not replay_saved:
             for replay in ReplayManager.replay_list:
                 if replay.name == "Empty":
                     print("Filling empty replay slot...")
@@ -974,6 +968,7 @@ def post_game():
                     replay.player_symbol = GameHandler.player_symbol
                     replay.enemy_symbol = GameHandler.enemy_symbol
                     print("Replay saved!")
+                    replay_saved = True
                     break
 
             create_onscreen_text(medium_font, black, "Nope", game_screen.width / 2, game_screen.height * 0.65, True)
