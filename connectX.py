@@ -1246,7 +1246,8 @@ def enemy_turn():
 
                             # Check for upper end
                             try:
-                                if not grid_manager.grid[r_ind - (goal_num - 1)][col_index].value and goal_num - 1 >= 0:
+                                if not grid_manager.grid[r_ind - (goal_num - 1)][col_index].value and \
+                                        r_ind - (goal_num - 1) >= 0:
                                     if symbol == GameHandler.player_symbol:
                                         print("Defensive move found (col u)")
                                         defensive_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
@@ -1257,6 +1258,117 @@ def enemy_turn():
                                 pass  # If space does not exist, ignore
 
                 col_index += 1
+
+            # Method 3: Checking descending diagonals
+
+            for row_ind, row in enumerate(grid_manager.grid):
+                for col_ind, cell in enumerate(row):
+                    y = row_ind
+                    x = col_ind
+
+                    symbol_count = 0
+
+                    board_size_y = GameHandler.current_mode.board.shape[0]
+                    board_size_x = GameHandler.current_mode.board.shape[1]
+
+                    while True:
+                        if y > board_size_y - 1 or x > board_size_x - 1:  # If values were larger than grid can support
+                            break
+
+                        else:
+                            if grid_manager.grid[y][x].value == symbol:
+                                symbol_count += 1
+
+                                if symbol_count == goal_num - 1:
+
+                                    fail_roll = random.randint(1, 100)
+                                    if fail_roll < GameHandler.difficulty:
+
+                                        # Checking for upper boundary
+                                        if y - (goal_num - 1) >= 0 and x - (goal_num - 1) >= 0:
+                                            if not grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)].value:
+                                                if symbol == GameHandler.player_symbol:
+                                                    print("Defensive move found (Desc. diagonal up)")
+                                                    defensive_moves.append(
+                                                        grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
+                                                elif symbol == GameHandler.enemy_symbol:
+                                                    print("Winning move found (desc. diagonal up)")
+                                                    winning_moves.append(
+                                                        grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
+
+                                        # Checking for lower boundary
+                                        if y + 1 <= board_size_y - 1 and x + 1 <= board_size_x - 1:
+                                            if not grid_manager.grid[y + 1][x + 1].value:
+                                                if symbol == GameHandler.player_symbol:
+                                                    print("Defensive move found (desc. diag down")
+                                                    defensive_moves.append(grid_manager.grid[y + 1][x + 1])
+                                                elif symbol == GameHandler.enemy_symbol:
+                                                    print("Winning move found (desc. diag down")
+                                                    winning_moves.append(grid_manager.grid[y + 1][x + 1])
+
+                                # Increase the coordinate values after any potential checks can be made
+                                y += 1
+                                x += 1
+
+                            else:
+                                break
+
+            # Method 4: Checking ascending diagonals
+            for row_ind, row in enumerate(grid_manager.grid):
+                for col_ind, cell in enumerate(row):
+                    y = row_ind
+                    x = col_ind
+
+                    symbol_count = 0
+
+                    board_size_y = GameHandler.current_mode.board.shape[0]
+                    board_size_x = GameHandler.current_mode.board.shape[1]
+
+                    while True:
+
+                        if y > board_size_y - 1 or x < 0:
+                            break
+
+                        else:
+                            if grid_manager.grid[y][x].value == symbol:
+                                symbol_count += 1
+                                if symbol_count == goal_num - 1:
+
+                                    fail_roll = random.randint(1, 80)  # Change back later
+                                    if fail_roll < GameHandler.difficulty:
+
+                                        # Coordinates of upper diagonal bound
+                                        upper_x = x + (goal_num - 1)
+                                        upper_y = y - (goal_num - 1)
+
+                                        # Checking if the upper diagonal bound exists and is free
+                                        if upper_y >= 0 and upper_x < board_size_x:
+
+                                            if not grid_manager.grid[upper_y][upper_x].value:
+                                                if symbol == GameHandler.player_symbol:
+                                                    print("Defensive move found (asc diag upper)")
+                                                    defensive_moves.append(grid_manager.grid[upper_y][upper_x])
+                                                if symbol == GameHandler.enemy_symbol:
+                                                    print("Winning move found (asc diag upper)")
+                                                    winning_moves.append(grid_manager.grid[upper_y][upper_x])
+
+                                        # Checking if the lower diagonal bound exists and is free
+                                        if y + 1 < board_size_y and x - 1 >= 0:
+                                            if not grid_manager.grid[y + 1][x - 1].value:
+
+                                                if symbol == GameHandler.player_symbol:
+                                                    print("Defensive move found (asc diag lower)")
+                                                    defensive_moves.append(grid_manager.grid[y + 1][x - 1])
+                                                if symbol == GameHandler.enemy_symbol:
+                                                    print("Winning move found (asc diag lower)")
+                                                    winning_moves.append(grid_manager.grid[y + 1][x - 1])
+
+                                # Increase the coordinate values after any potential checks can be made
+                                y += 1
+                                x -= 1
+
+                            else:
+                                break
 
         # Collecting existing moves from lists and executing one
 
