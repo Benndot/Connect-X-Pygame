@@ -1164,28 +1164,101 @@ grid_manager = GridManager([])
 
 
 def enemy_turn():
+
+    goal_num: int = GameHandler.current_mode.objective  # Number of aligned squares in order to win
+
+    winning_moves: list = []  # Moves that can win the CPU the game
+    defensive_moves: list = []  # Moves that can stop the player from winning
+    optimal_moves: list = []  # Moves that can build towards a win
+
     current_time = pygame.time.get_ticks()
     if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length \
             and GameHandler.game_status == "ongoing":
 
-        row_choice = random.choice(grid_manager.grid)
-        cell_choice = random.choice(row_choice)
+        for symbol in [GameHandler.enemy_symbol, GameHandler.player_symbol]:
 
-        print(cell_choice.cid)
+            # Method 1: Checking rows
+            for r_ind, row in enumerate(grid_manager.grid):
 
-        if not cell_choice.value:
+                symbol_count = 0
+                for c_ind, cell in enumerate(row):
+                    if cell.value == symbol:
+                        symbol_count += 1
+                    else:  # Reset the count
+                        symbol_count = 0
+                    if symbol_count == goal_num - 1:  # If symbol count is one short of the goal
 
-            stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
-            mixer.Sound.play(stamp_sound)
+                        fail_roll = random.randint(1, 100)  # Chance for CPU to do nothing
+                        if fail_roll < GameHandler.difficulty:  # CPU does act
 
-            cell_choice.value = GameHandler.enemy_symbol
-            DataTracker.enemy_move_list.append(cell_choice.cid)
-            print(f"The enemy has successfully selected cell {cell_choice.cid}!")
+                            # CPU will try to find the 2 potential cells that can complete the row
+
+                            # The far (rightmost) space
+                            try:
+                                if not grid_manager.grid[r_ind][c_ind + 1].value:  # Cell exists and is valueless
+                                    if symbol == GameHandler.player_symbol:
+                                        print("Defensive move found")
+                                        defensive_moves.append(grid_manager.grid[r_ind][c_ind + 1])
+                                    elif symbol == GameHandler.enemy_symbol:
+                                        print("Winning move found")
+                                        winning_moves.append(grid_manager.grid[r_ind][c_ind + 1])
+                            except IndexError:
+                                pass  # If space does not exist, ignore
+
+                            # The near (leftmost) space
+                            try:
+                                if not grid_manager.grid[r_ind][c_ind - (goal_num - 1)].value and \
+                                        c_ind - (goal_num - 1) >= 0:
+                                    if symbol == GameHandler.player_symbol:
+                                        print("Defensive move found")
+                                        defensive_moves.append(grid_manager.grid[r_ind][c_ind - (goal_num - 1)])
+                                    elif symbol == GameHandler.enemy_symbol:
+                                        print("Winning move found")
+                                        winning_moves.append(grid_manager.grid[r_ind][c_ind - (goal_num - 1)])
+                            except IndexError:
+                                pass  # If space does not exist, ignore
+
+        # Collecting existing moves from lists and executing one
+
+        def resolve_enemy_turn(chosen_cell):
+            chosen_cell.value = GameHandler.enemy_symbol
+            DataTracker.enemy_move_list.append(chosen_cell.cid)
+            print(f"The enemy has successfully selected cell {chosen_cell.cid}!")
             GameHandler.player_turn = True
             GameHandler.time_taken = False
+
+        def move_decision(list_of_cell_lists: list[list[GridCell]]):
+            for option_list in list_of_cell_lists:
+                if len(option_list) >= 1:
+                    for g_cell in option_list:
+                        print(g_cell.cid)
+                    cell_chosen = random.choice(option_list)
+                    resolve_enemy_turn(cell_chosen)
+                    return True
+            return False
+
+        move_made: bool = move_decision([winning_moves, defensive_moves, optimal_moves])
+
+        if move_made:
+            print("Move was made")
             return
-        else:
-            enemy_turn()  # Recurse
+
+        # Final method: Random selection
+        if not move_made:
+            row_choice = random.choice(grid_manager.grid)
+            cell_choice = random.choice(row_choice)
+
+            print(cell_choice.cid)
+
+            if not cell_choice.value:
+
+                stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
+                mixer.Sound.play(stamp_sound)
+
+                resolve_enemy_turn(cell_choice)
+                return
+            else:
+                enemy_turn()  # Recurse
 
 
 def tie_check():
