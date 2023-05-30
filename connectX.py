@@ -1218,6 +1218,46 @@ def enemy_turn():
                             except IndexError:
                                 pass  # If space does not exist, ignore
 
+            # Method 2: Checking columns
+            col_index = 0
+            while col_index <= GameHandler.current_mode.board.shape[1] - 1:
+                symbol_count = 0
+                for r_ind, row in enumerate(grid_manager.grid):
+                    if row[col_index].value == symbol:
+                        symbol_count += 1
+                    else:
+                        symbol_count = 0
+                    if symbol_count == goal_num - 1:
+
+                        fail_roll = random.randint(1, 100)  # Chance for CPU to do nothing
+                        if fail_roll < GameHandler.difficulty:  # CPU does act
+
+                            # Check for lower end
+                            try:
+                                if not grid_manager.grid[r_ind + 1][col_index].value:
+                                    if symbol == GameHandler.player_symbol:
+                                        print("Defensive move found (col l)")
+                                        defensive_moves.append(grid_manager.grid[r_ind + 1][col_index])
+                                    elif symbol == GameHandler.enemy_symbol:
+                                        print("Winning move found (col l)")
+                                        winning_moves.append(grid_manager.grid[r_ind + 1][col_index])
+                            except IndexError:
+                                pass  # If space does not exist, ignore
+
+                            # Check for upper end
+                            try:
+                                if not grid_manager.grid[r_ind - (goal_num - 1)][col_index].value and goal_num - 1 >= 0:
+                                    if symbol == GameHandler.player_symbol:
+                                        print("Defensive move found (col u)")
+                                        defensive_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
+                                    elif symbol == GameHandler.enemy_symbol:
+                                        print("Winning move found (col u)")
+                                        winning_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
+                            except IndexError:
+                                pass  # If space does not exist, ignore
+
+                col_index += 1
+
         # Collecting existing moves from lists and executing one
 
         def resolve_enemy_turn(chosen_cell):
