@@ -1067,7 +1067,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
 
         outline_rect = pygame.Rect(x, y, self.width, self.height)
 
-        if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn:  # Hover
+        if x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn == True:
             pygame.draw.rect(game_screen.screen, white, outline_rect, int(game_screen.height / 360))
             if not self.is_hovered:
                 hover_sound = mixer.Sound('audio/button_click.mp3')
@@ -1076,7 +1076,7 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
             for evnt in pygame.event.get():
                 if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
                     return x, y, self.width, self.height
-        elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and not GameHandler.player_turn:
+        elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn == False:
             pygame.draw.rect(game_screen.screen, red, outline_rect, int(game_screen.height / 360))
             if not self.is_hovered:
                 hover_sound = mixer.Sound('audio/button_click.mp3')
@@ -1318,6 +1318,7 @@ def post_game_reset():
     DataTracker.player_move_list = []
     DataTracker.enemy_move_list = []
     GameHandler.game_status = "pregame"
+    GameHandler.player_turn = None
 
 # ----------------------------------------------------------------------------------------------------------------------
 
