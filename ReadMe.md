@@ -55,12 +55,14 @@ can be reset to the beginning at any point.
 
 implement basic save file features
 
-More advanced enemy AI features
+Continue implementing advanced CPU behaviour
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
 first on their first turn
 
 ### Ideas
+
+make window resizable
 
 highlight winning cells
 

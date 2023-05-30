@@ -426,10 +426,16 @@ def replays_menu():
 
             if delete_option:
                 delete_button = create_text_button(medium_font, black, "X", game_screen.width * 0.88,
-                                                   game_screen.height * 0.25 * height_multiplier, red, lightgray,
-                                                   True, False)
+                                                   game_screen.height * 0.25 * height_multiplier,
+                                                   red if replay.name == "Empty" else green, lightgray, True, False)
 
                 if delete_button:
+                    if replay.name != "Empty":
+                        delete_sound = mixer.Sound("audio/lose.wav")
+                        mixer.Sound.play(delete_sound)
+                    else:
+                        reject_sound = mixer.Sound("audio/rejection.wav")
+                        mixer.Sound.play(reject_sound)
                     replay.name = "Empty"
                     replay.game_mode = tic_tac_toe
                     replay.player_moves = []
@@ -1334,7 +1340,7 @@ def enemy_turn():
                                 symbol_count += 1
                                 if symbol_count == goal_num - 1:
 
-                                    fail_roll = random.randint(1, 80)  # Change back later
+                                    fail_roll = random.randint(1, 100) 
                                     if fail_roll < GameHandler.difficulty:
 
                                         # Coordinates of upper diagonal bound
