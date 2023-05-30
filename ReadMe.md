@@ -48,7 +48,8 @@ confirmed with a button press.
 
 The replay menu allows the user to review and delete replays of previous games that they played and chose to save. 
 Clicking on a replay takes them to the replay player, which allows them to cycle through the turns of the replay in
-question. 
+question. Each progress button click proceeds through a turn, showing both moves made in proper sequence. The replay 
+can be reset to the beginning at any point. 
  
 ### TODO
 
@@ -56,9 +57,8 @@ implement basic save file features
 
 More advanced enemy AI features
 
-replay reset button and functionality in the player
-
-Create a short pause between win/loss/tie move and the user being brought the post-game screen
+Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
+first on their first turn
 
 ### Ideas
 

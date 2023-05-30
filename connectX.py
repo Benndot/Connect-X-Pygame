@@ -445,7 +445,7 @@ def replays_menu():
                                                 game_screen.height * 0.85, slategray, lightgray, True)
 
         if del_options_button:
-            delete_option = True
+            delete_option = not delete_option
 
         return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.2,
                                            game_screen.height * 0.85, slategray, lightgray, False, True)
@@ -463,6 +463,24 @@ def replays_menu():
 
 
 def replay_player(replay):
+    def cycle_turn(participant: str):
+
+        if participant == "player":
+            try:
+                move_coords = replay.player_moves[move_list_index]
+                grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.player_symbol
+            except IndexError:
+                print("Move does not exist")
+                return True
+
+        if participant == "enemy":
+            try:
+                move_coords = replay.enemy_moves[move_list_index]
+                grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.enemy_symbol
+            except IndexError:
+                print("Move does not exist")
+                return True
+        return False
 
     move_list_index = 0  # This is the proper index of the current turn
 
@@ -470,16 +488,16 @@ def replay_player(replay):
 
     replay_complete = False  # True if we have reached the end of one of the move lists
 
-    player_turn = True
-    turn_tracker: int = 0  # Reach 2 (meaning both player's have gone), then reset
+    turn_timer_gate: bool = False
+    turn_timer_start: int = 0
 
     while True:
 
         game_screen.screen.fill((210, 90, 55))
 
-        create_onscreen_text(large_font, black, "Start" if move_list_index == 0 and turn_tracker == 0 else
-                             f"Turn {move_list_index + 1}" if not replay_complete else f"Complete",
-                             game_screen.width / 2, game_screen.height / 50, True)
+        header_string = "Start" if move_list_index == 0 else f"Turn {move_list_index}" if not replay_complete \
+            else f"Complete"
+        create_onscreen_text(large_font, black, header_string, game_screen.width / 2, game_screen.height / 50, True)
 
         create_onscreen_text(medium_font, black, "Player", game_screen.width * 0.05, game_screen.height * 0.25)
         create_onscreen_text(medium_font, black, f"{replay.player_symbol}", game_screen.width * 0.05,
@@ -490,48 +508,36 @@ def replay_player(replay):
 
         grid_manager.blit_grid()
 
-        progress_button = create_text_button(intermediate_font, black, "Progress", game_screen.width / 2,
-                                             game_screen.height * 0.88, slategray, lightgray, True, True)
+        progress_button = create_text_button(intermediate_font, black if not turn_timer_gate else white,
+                                             "Progress", game_screen.width / 2, game_screen.height * 0.88,
+                                             slategray if not turn_timer_gate else black,
+                                             lightgray if not turn_timer_gate else black,
+                                             True,
+                                             True if not turn_timer_gate else False)
 
-        if progress_button:
+        if progress_button and not turn_timer_gate:
             print("Progress game replay 1 turn")
+            replay_complete = cycle_turn('player') if replay.priority else cycle_turn('enemy')
+            turn_timer_gate = True
+            turn_timer_start = pygame.time.get_ticks()
 
-            def cycle_turn(participant: str):
+        current_time = pygame.time.get_ticks()
+        if turn_timer_gate and current_time - turn_timer_start >= 1000:
+            replay_complete = cycle_turn('enemy') if replay.priority else cycle_turn('player')
+            turn_timer_gate = False
+            move_list_index += 1
 
-                if participant == "player":
-                    try:
-                        move_coords = replay.player_moves[move_list_index]
-                        grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.player_symbol
-                    except IndexError:
-                        print("Move does not exist")
-                        return True
+        reset_button = create_text_button(medium_font, black, "Reset", game_screen.width / 65,
+                                          game_screen.height * 0.88, slategray, lightgray, False, True)
 
-                if participant == "enemy":
-                    try:
-                        move_coords = replay.enemy_moves[move_list_index]
-                        grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.enemy_symbol
-                    except IndexError:
-                        print("Move does not exist")
-                        return True
-                return False
-
-            if player_turn:
-                replay_complete = cycle_turn('player')
-                player_turn = not player_turn
-            elif not player_turn:
-                cycle_turn("enemy")
-                player_turn = not player_turn
-
-            turn_tracker += 1
-            if turn_tracker == 2:
-                turn_tracker = 0
-                move_list_index += 1
-
-        ff_button = create_text_button(medium_font, black, "Fast-Forward", game_screen.width / 65,
-                                       game_screen.height * 0.88, slategray, lightgray, False, True)
-
-        if ff_button:
-            print("Fast-forward")
+        if reset_button:
+            print("Reset")
+            grid_manager.grid = []
+            grid_manager.generate_replay_grid(replay)
+            move_list_index = 0
+            replay_complete = False
+            turn_timer_gate: bool = False
+            turn_timer_start: int = 0
 
         return_button = create_text_button(medium_font, black, "Return", game_screen.width / 1.18,
                                            game_screen.height * 0.88, slategray, lightgray, False, True)
@@ -872,7 +878,7 @@ def pre_game_rules(flip_status):
     game_rules = f" {GameHandler.current_mode.title} involves you and your opponent choosing to fill in slots on a " \
                  f"{GameHandler.current_mode.board.shape[0]} by {GameHandler.current_mode.board.shape[1]} board. " \
                  f"The goal of the game is to align {GameHandler.current_mode.objective} of your characters in a row " \
-                 f"anywhere on the board_shape before your opponent does. If the board fills up before either player " \
+                 f"anywhere on the board before your opponent does. If the board fills up before either player " \
                  f"accomplishes this objective, the game ends in a tie."
 
     while True:
@@ -1188,7 +1194,7 @@ def tie_check():
         for cell in row:
             if not cell.value:
                 open_cells += 1
-    if open_cells == 0:
+    if open_cells == 0 and GameHandler == "ongoing":
         print("There are no more available squares and no one has won. The game ends in a tie!")
         GameHandler.game_status = "tied"
         return
