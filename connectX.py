@@ -433,17 +433,18 @@ def replays_menu():
                     if replay.name != "Empty":
                         delete_sound = mixer.Sound("audio/lose.wav")
                         mixer.Sound.play(delete_sound)
+                        replay.name = "Empty"
+                        replay.game_mode = tic_tac_toe
+                        replay.player_moves = []
+                        replay.enemy_moves = []
+                        replay.priority = False
+                        replay.player_symbol = "X"
+                        replay.enemy_symbol = "O"
+                        print("Replay deleted!")
                     else:
                         reject_sound = mixer.Sound("audio/rejection.wav")
                         mixer.Sound.play(reject_sound)
-                    replay.name = "Empty"
-                    replay.game_mode = tic_tac_toe
-                    replay.player_moves = []
-                    replay.enemy_moves = []
-                    replay.priority = False
-                    replay.player_symbol = "X"
-                    replay.enemy_symbol = "O"
-                    print("Replay deleted!")
+                        print("Replay slot empty!")
 
             height_multiplier += 0.35
 
@@ -476,7 +477,6 @@ def replay_player(replay):
                 move_coords = replay.player_moves[move_list_index]
                 grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.player_symbol
             except IndexError:
-                print("Move does not exist")
                 return True
 
         if participant == "enemy":
@@ -484,7 +484,6 @@ def replay_player(replay):
                 move_coords = replay.enemy_moves[move_list_index]
                 grid_manager.grid[move_coords[0]][move_coords[1]].value = replay.enemy_symbol
             except IndexError:
-                print("Move does not exist")
                 return True
         return False
 
@@ -521,14 +520,14 @@ def replay_player(replay):
                                              True,
                                              True if not turn_timer_gate else False)
 
-        if progress_button and not turn_timer_gate:
+        if progress_button and not turn_timer_gate and not replay_complete:
             print("Progress game replay 1 turn")
             replay_complete = cycle_turn('player') if replay.priority else cycle_turn('enemy')
             turn_timer_gate = True
             turn_timer_start = pygame.time.get_ticks()
 
         current_time = pygame.time.get_ticks()
-        if turn_timer_gate and current_time - turn_timer_start >= 1000:
+        if turn_timer_gate and current_time - turn_timer_start >= 1000 and not replay_complete:
             replay_complete = cycle_turn('enemy') if replay.priority else cycle_turn('player')
             turn_timer_gate = False
             move_list_index += 1
