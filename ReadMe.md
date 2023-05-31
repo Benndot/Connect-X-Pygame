@@ -36,7 +36,8 @@ conducted on the game logic, and the user can return to the main menu to play ag
 
 ---
 
-In terms of working side features so far, there is the music menu and symbol selection. 
+In terms of side features, there is currently the soundtrack / music menu, the symbol selection menu and the replay
+menu / player. 
 
 The music menu controls the game's soundtrack, which acts as the backing music for the entire game. From here, the user
 can choose to mute the music, change which track is playing, or tweak the music's volume. Mute buttons, however, are
@@ -53,9 +54,9 @@ can be reset to the beginning at any point.
  
 ### TODO
 
-implement basic save file features
+implement basic save file (shelve) features
 
-Continue implementing advanced CPU behaviour
+Keep building CPU behaviour: inter-chain cell fills, optimal moves
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
 first on their first turn

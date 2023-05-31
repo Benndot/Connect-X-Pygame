@@ -282,7 +282,7 @@ class GameHandler:
 
     current_mode = connect4
 
-    difficulty: int = 80  # Setting a CPU difficulty level variable
+    difficulty: int = 0  # Setting a CPU difficulty level variable
 
     player_symbol: str = var_save_value(save_file, "player_symbol", "X")
     enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
@@ -1173,9 +1173,10 @@ def enemy_turn():
 
     goal_num: int = GameHandler.current_mode.objective  # Number of aligned squares in order to win
 
-    winning_moves: list = []  # Moves that can win the CPU the game
-    defensive_moves: list = []  # Moves that can stop the player from winning
-    optimal_moves: list = []  # Moves that can build towards a win
+    winning_moves: list[GridCell] = []  # Moves that can win the CPU the game
+    defensive_moves: list[GridCell] = []  # Moves that can stop the player from winning
+    optimal_moves: list[GridCell] = []  # Moves that can build towards a win
+    constructive_moves: list[GridCell] = []
 
     current_time = pygame.time.get_ticks()
     if current_time - GameHandler.enemy_turn_start_time >= GameHandler.enemy_turn_length \
@@ -1195,7 +1196,7 @@ def enemy_turn():
                     if symbol_count == goal_num - 1:  # If symbol count is one short of the goal
 
                         fail_roll = random.randint(1, 100)  # Chance for CPU to do nothing
-                        if fail_roll < GameHandler.difficulty:  # CPU does act
+                        if fail_roll > GameHandler.difficulty:  # CPU does act
 
                             # CPU will try to find the 2 potential cells that can complete the row
 
@@ -1236,7 +1237,7 @@ def enemy_turn():
                     if symbol_count == goal_num - 1:
 
                         fail_roll = random.randint(1, 100)  # Chance for CPU to do nothing
-                        if fail_roll < GameHandler.difficulty:  # CPU does act
+                        if fail_roll > GameHandler.difficulty:  # CPU does act
 
                             # Check for lower end
                             try:
@@ -1285,32 +1286,51 @@ def enemy_turn():
                             if grid_manager.grid[y][x].value == symbol:
                                 symbol_count += 1
 
-                                if symbol_count == goal_num - 1:
+                                if symbol_count == goal_num - 1 or 2 <= symbol_count < goal_num - 1 and \
+                                        symbol == GameHandler.enemy_symbol:
 
                                     fail_roll = random.randint(1, 100)
-                                    if fail_roll < GameHandler.difficulty:
+                                    if fail_roll > GameHandler.difficulty:
 
                                         # Checking for upper boundary
                                         if y - (goal_num - 1) >= 0 and x - (goal_num - 1) >= 0:
                                             if not grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)].value:
-                                                if symbol == GameHandler.player_symbol:
-                                                    print("Defensive move found (Desc. diagonal up)")
-                                                    defensive_moves.append(
-                                                        grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
-                                                elif symbol == GameHandler.enemy_symbol:
-                                                    print("Winning move found (desc. diagonal up)")
-                                                    winning_moves.append(
+
+                                                # Winning and defensive moves
+                                                if symbol_count == goal_num - 1:
+                                                    if symbol == GameHandler.player_symbol:
+                                                        print("Defensive move found (Desc. diagonal up)")
+                                                        defensive_moves.append(
+                                                            grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
+                                                    elif symbol == GameHandler.enemy_symbol:
+                                                        print("Winning move found (desc. diagonal up)")
+                                                        winning_moves.append(
+                                                            grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
+
+                                                # Optimal moves
+                                                elif 2 <= symbol_count < goal_num - 1:
+                                                    print("Optimal move found (Desc. diagonal up)")
+                                                    optimal_moves.append(
                                                         grid_manager.grid[y - (goal_num - 1)][x - (goal_num - 1)])
 
                                         # Checking for lower boundary
                                         if y + 1 <= board_size_y - 1 and x + 1 <= board_size_x - 1:
                                             if not grid_manager.grid[y + 1][x + 1].value:
-                                                if symbol == GameHandler.player_symbol:
-                                                    print("Defensive move found (desc. diag down")
-                                                    defensive_moves.append(grid_manager.grid[y + 1][x + 1])
-                                                elif symbol == GameHandler.enemy_symbol:
-                                                    print("Winning move found (desc. diag down")
-                                                    winning_moves.append(grid_manager.grid[y + 1][x + 1])
+
+                                                # Winning and defensive moves
+                                                if symbol_count == goal_num - 1:
+                                                    if symbol == GameHandler.player_symbol:
+                                                        print("Defensive move found (desc. diag down")
+                                                        defensive_moves.append(grid_manager.grid[y + 1][x + 1])
+                                                    elif symbol == GameHandler.enemy_symbol:
+                                                        print("Winning move found (desc. diag down")
+                                                        winning_moves.append(grid_manager.grid[y + 1][x + 1])
+                                                        # Optimal moves
+
+                                                # Optimal moves
+                                                elif 2 <= symbol_count < goal_num - 1:
+                                                    print("Optimal move found (Desc. diagonal up)")
+                                                    optimal_moves.append(grid_manager.grid[y + 1][x + 1])
 
                                 # Increase the coordinate values after any potential checks can be made
                                 y += 1
@@ -1341,7 +1361,7 @@ def enemy_turn():
                                 if symbol_count == goal_num - 1:
 
                                     fail_roll = random.randint(1, 100)
-                                    if fail_roll < GameHandler.difficulty:
+                                    if fail_roll > GameHandler.difficulty:
 
                                         # Coordinates of upper diagonal bound
                                         upper_x = x + (goal_num - 1)
@@ -1391,19 +1411,20 @@ def enemy_turn():
                         if coord[0] >= 0 and coord[1] >= 0:
 
                             fail_roll = random.randint(1, 100)
-                            if fail_roll <= GameHandler.difficulty:
+                            if fail_roll > GameHandler.difficulty:
 
                                 try:
                                     target_cell = grid_manager.grid[coord[0]][coord[1]]
                                     if not target_cell.value:
-                                        optimal_moves.append(target_cell)
-                                        print(f"Got one! id = {target_cell.cid}")
+                                        constructive_moves.append(target_cell)
                                 except IndexError:
                                     pass  # Ignore if cell doesn't exist
 
         # Collecting existing moves from lists and executing one
 
         def resolve_enemy_turn(chosen_cell):
+            stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
+            mixer.Sound.play(stamp_sound)
             chosen_cell.value = GameHandler.enemy_symbol
             DataTracker.enemy_move_list.append(chosen_cell.cid)
             print(f"The enemy has successfully selected cell {chosen_cell.cid}!")
@@ -1411,16 +1432,18 @@ def enemy_turn():
             GameHandler.time_taken = False
 
         def move_decision(list_of_cell_lists: list[list[GridCell]]):
-            for option_list in list_of_cell_lists:
+            labels: list[str] = ["Winning", "Defensive", "Optimal", "Constructive"]
+            for index, option_list in enumerate(list_of_cell_lists):
                 if len(option_list) >= 1:
                     for g_cell in option_list:
                         print(g_cell.cid)
                     cell_chosen = random.choice(option_list)
                     resolve_enemy_turn(cell_chosen)
+                    print(f"{labels[index]} list was used")
                     return True
             return False
 
-        move_made: bool = move_decision([winning_moves, defensive_moves, optimal_moves])
+        move_made: bool = move_decision([winning_moves, defensive_moves, optimal_moves, constructive_moves])
 
         if move_made:
             print("Move from advanced logic was made")
@@ -1434,10 +1457,6 @@ def enemy_turn():
             print(cell_choice.cid)
 
             if not cell_choice.value:
-
-                stamp_sound = mixer.Sound("audio/kermite607_stamp.wav")
-                mixer.Sound.play(stamp_sound)
-
                 resolve_enemy_turn(cell_choice)
                 return
             else:
