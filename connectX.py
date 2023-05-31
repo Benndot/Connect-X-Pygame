@@ -1340,7 +1340,7 @@ def enemy_turn():
                                 symbol_count += 1
                                 if symbol_count == goal_num - 1:
 
-                                    fail_roll = random.randint(1, 100) 
+                                    fail_roll = random.randint(1, 100)
                                     if fail_roll < GameHandler.difficulty:
 
                                         # Coordinates of upper diagonal bound
@@ -1376,6 +1376,31 @@ def enemy_turn():
                             else:
                                 break
 
+        # Last advanced method: Finding moves that allow the enemy to build off a single square
+        for row_ind, row in enumerate(grid_manager.grid):
+            for col_ind, cell in enumerate(row):
+                if cell.value == GameHandler.enemy_symbol:
+
+                    # Compiling all 8 potential coords of cells surrounding any given cell filled with the enemy symbol
+                    potential_cell_coords: list[tuple] = [(row_ind, col_ind - 1), (row_ind, col_ind + 1),
+                                                          (row_ind - 1, col_ind), (row_ind + 1, col_ind),
+                                                          (row_ind - 1, col_ind - 1), (row_ind + 1, col_ind + 1),
+                                                          (row_ind - 1, col_ind + 1), (row_ind + 1, col_ind - 1)]
+
+                    for coord in potential_cell_coords:
+                        if coord[0] >= 0 and coord[1] >= 0:
+
+                            fail_roll = random.randint(1, 100)
+                            if fail_roll <= GameHandler.difficulty:
+
+                                try:
+                                    target_cell = grid_manager.grid[coord[0]][coord[1]]
+                                    if not target_cell.value:
+                                        optimal_moves.append(target_cell)
+                                        print(f"Got one! id = {target_cell.cid}")
+                                except IndexError:
+                                    pass  # Ignore if cell doesn't exist
+
         # Collecting existing moves from lists and executing one
 
         def resolve_enemy_turn(chosen_cell):
@@ -1398,7 +1423,7 @@ def enemy_turn():
         move_made: bool = move_decision([winning_moves, defensive_moves, optimal_moves])
 
         if move_made:
-            print("Move was made")
+            print("Move from advanced logic was made")
             return
 
         # Final method: Random selection
