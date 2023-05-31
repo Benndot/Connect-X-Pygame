@@ -51,6 +51,22 @@ The replay menu allows the user to review and delete replays of previous games t
 Clicking on a replay takes them to the replay player, which allows them to cycle through the turns of the replay in
 question. Each progress button click proceeds through a turn, showing both moves made in proper sequence. The replay 
 can be reset to the beginning at any point. 
+
+---
+
+## CPU Logic 
+
+The CPU logic works on 5 tiers of potential moves:
+
+1. Winning: A move that will win it the game
+2. Defensive: A move that will block a potential winning move of the player's 
+3. Optimal: A move that will build a chain of squares beyond 2, but not long enough to win
+4. Constructive: A move that will build off a single existing square of theirs
+5. Random: Decided through random selection
+
+Each tier has priority after the next. 
+
+Currently, optimal moves are mostly unimplemented. They only work for squares in a descending diagonal arrangement.
  
 ### TODO
 
