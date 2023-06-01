@@ -1251,35 +1251,56 @@ def enemy_turn():
                         symbol_count += 1
                     else:
                         symbol_count = 0
-                    if symbol_count == goal_num - 1:
+                    if symbol_count == goal_num - 1 or 2 <= symbol_count < goal_num - 1:
 
                         fail_roll = random.randint(1, 100)  # Chance for CPU to do nothing
                         if fail_roll > GameHandler.difficulty:  # CPU does act
 
                             # Check for lower end
-                            try:
-                                if not grid_manager.grid[r_ind + 1][col_index].value:
-                                    if symbol == GameHandler.player_symbol:
-                                        print("Defensive move found (col l)")
-                                        defensive_moves.append(grid_manager.grid[r_ind + 1][col_index])
-                                    elif symbol == GameHandler.enemy_symbol:
-                                        print("Winning move found (col l)")
-                                        winning_moves.append(grid_manager.grid[r_ind + 1][col_index])
-                            except IndexError:
-                                pass  # If space does not exist, ignore
+                            if symbol_count == goal_num - 1:
+                                try:
+                                    if not grid_manager.grid[r_ind + 1][col_index].value:
+                                        if symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (col l)")
+                                            defensive_moves.append(grid_manager.grid[r_ind + 1][col_index])
+                                        elif symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (col l)")
+                                            winning_moves.append(grid_manager.grid[r_ind + 1][col_index])
+                                except IndexError:
+                                    pass  # If space does not exist, ignore
+
+                            elif 2 <= symbol_count < goal_num - 1:
+                                try:
+                                    if not grid_manager.grid[r_ind + 1][col_index].value:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Optimal move found (lower column)")
+                                            optimal_moves.append(grid_manager.grid[r_ind + 1][col_index])
+                                except IndexError:
+                                    pass  # If space does not exist, ignore
 
                             # Check for upper end
-                            try:
-                                if not grid_manager.grid[r_ind - (goal_num - 1)][col_index].value and \
-                                        r_ind - (goal_num - 1) >= 0:
-                                    if symbol == GameHandler.player_symbol:
-                                        print("Defensive move found (col u)")
-                                        defensive_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
-                                    elif symbol == GameHandler.enemy_symbol:
-                                        print("Winning move found (col u)")
-                                        winning_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
-                            except IndexError:
-                                pass  # If space does not exist, ignore
+                            if symbol_count == goal_num - 1:
+                                try:
+                                    if not grid_manager.grid[r_ind - (goal_num - 1)][col_index].value and \
+                                            r_ind - (goal_num - 1) >= 0:
+                                        if symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (col u)")
+                                            defensive_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
+                                        elif symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (col u)")
+                                            winning_moves.append(grid_manager.grid[r_ind - (goal_num - 1)][col_index])
+                                except IndexError:
+                                    pass  # If space does not exist, ignore
+
+                            elif 2 <= symbol_count < goal_num - 1:
+                                try:
+                                    if not grid_manager.grid[r_ind - symbol_count][col_index].value and \
+                                            r_ind - symbol_count >= 0:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Optimal move found (upper column)")
+                                            optimal_moves.append(grid_manager.grid[r_ind - symbol_count][col_index])
+                                except IndexError:
+                                    pass  # If space does not exist, ignore
 
                 col_index += 1
 
