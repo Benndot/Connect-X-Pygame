@@ -1269,6 +1269,7 @@ def enemy_turn():
                                 except IndexError:
                                     pass  # If space does not exist, ignore
 
+                            # Optimal move, lower column
                             elif 2 <= symbol_count < goal_num - 1:
                                 try:
                                     if not grid_manager.grid[r_ind + 1][col_index].value:
@@ -1292,6 +1293,7 @@ def enemy_turn():
                                 except IndexError:
                                     pass  # If space does not exist, ignore
 
+                            # Optimal move, upper column
                             elif 2 <= symbol_count < goal_num - 1:
                                 try:
                                     if not grid_manager.grid[r_ind - symbol_count][col_index].value and \
@@ -1400,7 +1402,7 @@ def enemy_turn():
                         else:
                             if grid_manager.grid[y][x].value == symbol:
                                 symbol_count += 1
-                                if symbol_count == goal_num - 1:
+                                if symbol_count == goal_num - 1 or 2 <= symbol_count < goal_num - 1:
 
                                     fail_roll = random.randint(1, 100)
                                     if fail_roll > GameHandler.difficulty:
@@ -1410,7 +1412,7 @@ def enemy_turn():
                                         upper_y = y - (goal_num - 1)
 
                                         # Checking if the upper diagonal bound exists and is free
-                                        if upper_y >= 0 and upper_x < board_size_x:
+                                        if upper_y >= 0 and upper_x < board_size_x and symbol_count == goal_num - 1:
 
                                             if not grid_manager.grid[upper_y][upper_x].value:
                                                 if symbol == GameHandler.player_symbol:
@@ -1420,10 +1422,20 @@ def enemy_turn():
                                                     print("Winning move found (asc diag upper)")
                                                     winning_moves.append(grid_manager.grid[upper_y][upper_x])
 
-                                        # Checking if the lower diagonal bound exists and is free
-                                        if y + 1 < board_size_y and x - 1 >= 0:
-                                            if not grid_manager.grid[y + 1][x - 1].value:
+                                        # Checking for upper optimal move
+                                        elif y - symbol_count >= 0 and x + symbol_count < board_size_x and \
+                                                2 <= symbol_count < goal_num - 1:
+                                            if not grid_manager.grid[y - symbol_count][x + symbol_count].value and \
+                                                    symbol == GameHandler.enemy_symbol:
+                                                print("Optimal move found (asc diag upper)")
+                                                optimal_moves.append(
+                                                    grid_manager.grid[y - symbol_count][x + symbol_count])
 
+                                        # Checking if the lower diagonal bound exists and is free
+                                        if y + 1 < board_size_y and x - 1 >= 0 and not \
+                                                grid_manager.grid[y + 1][x - 1].value:
+
+                                            if symbol_count == goal_num - 1:
                                                 if symbol == GameHandler.player_symbol:
                                                     print("Defensive move found (asc diag lower)")
                                                     defensive_moves.append(grid_manager.grid[y + 1][x - 1])
@@ -1431,8 +1443,13 @@ def enemy_turn():
                                                     print("Winning move found (asc diag lower)")
                                                     winning_moves.append(grid_manager.grid[y + 1][x - 1])
 
+                                            elif 2 <= symbol_count < goal_num - 1:
+                                                if symbol == GameHandler.enemy_symbol:
+                                                    print("Optimal move found (Optimal move found asc diag lower")
+                                                    optimal_moves.append(grid_manager.grid[y + 1][x - 1])
+
                                 # Increase the coordinate values after any potential checks can be made
-                                y += 1
+                                y += 1  # Searches for chained cells in a descending pattern
                                 x -= 1
 
                             else:
@@ -1477,8 +1494,6 @@ def enemy_turn():
             labels: list[str] = ["Winning", "Defensive", "Optimal", "Constructive"]
             for index, option_list in enumerate(list_of_cell_lists):
                 if len(option_list) >= 1:
-                    for g_cell in option_list:
-                        print(g_cell.cid)
                     cell_chosen = random.choice(option_list)
                     resolve_enemy_turn(cell_chosen)
                     print(f"{labels[index]} list was used")
@@ -1488,7 +1503,6 @@ def enemy_turn():
         move_made: bool = move_decision([winning_moves, defensive_moves, optimal_moves, constructive_moves])
 
         if move_made:
-            print("Move from advanced logic was made")
             return
 
         # Final method: Random selection

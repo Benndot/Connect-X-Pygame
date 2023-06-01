@@ -60,22 +60,23 @@ The CPU logic works on 5 tiers of potential moves:
 
 1. Winning: A move that will win it the game
 2. Defensive: A move that will block a potential winning move of the player's 
-3. Optimal: A move that will build a chain of squares beyond 2, but not long enough to win
-4. Constructive: A move that will build off a single existing square of theirs
+3. Optimal: A move that will build on a chain of squares 2 or longer, but not long enough to win
+4. Constructive: A move that will build a chain 2 squares long based off a square they have already placed
 5. Random: Decided through random selection
 
 Each tier has priority after the next. 
 
-Currently, optimal moves are mostly unimplemented. They only work for squares in a descending diagonal arrangement.
+An optimal move describes a move that won't win the CPU the game, but will build on two or more squares in a row in 
+order to work towards that goal. 
  
 ### TODO
 
 implement basic save file (shelve) features
 
-Keep building CPU behaviour: inter-chain cell fills, optimal moves
+Keep building CPU behaviour: inner-chain fills
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
-first on their first turn
+first on their first turn.
 
 ### Ideas
 
