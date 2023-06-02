@@ -82,6 +82,8 @@ first on their first turn.
 
 incorporate font sizes into game-mode adjustment options
 
+custom game mode creation
+
 make window resizable
 
 highlight winning cells

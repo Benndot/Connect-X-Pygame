@@ -210,7 +210,8 @@ connect3 = GameMode("Connect3", np.full((4, 5), "-"), 3, cell_width=float(game_s
 
 wide_boi = GameMode("Wide Boi", np.full((4, 8), "-"), 4, cell_x_offset=0.1, cell_y_offset=0.17, y_offset_step=0.15)
 
-tall_boi = GameMode("Tall Boi", np.full((8, 4), "-"), 4)
+tall_boi = GameMode("Tall Boi", np.full((8, 4), "-"), 4, cell_x_offset=0.33, cell_width=float(game_screen.width / 13),
+                    cell_height=float(game_screen.height / 10), x_offset_step=float(0.08), y_offset_step=float(0.1))
 
 tic_tac_toe = GameMode("Tic-Tac-Toe", np.full((3, 3), "-"), 3, cell_width=float(game_screen.width / 6.5),
                        cell_height=float(game_screen.height / 5), x_offset_step=float(0.16),
@@ -221,8 +222,6 @@ cheese_crackers = GameMode("Cheese & Crackers", np.full((5, 5), "-"), 4, cell_x_
 
 deluxe = GameMode("Connect6", np.full((9, 10), "-"), 6, cell_x_offset=0.12, cell_width=float(game_screen.width / 15),
                   cell_height=float(game_screen.height / 11), x_offset_step=0.07, y_offset_step=0.09)
-
-custom_mode = GameMode("Custom", np.full((99, 99), "-"), 99)  # Not meant to be played in this form
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -756,7 +755,7 @@ def mode_selection():
     while True:
         game_screen.screen.fill((100, 200, 200))
 
-        game_mode_list = [connect4, connect3, wide_boi, tall_boi, tic_tac_toe, cheese_crackers, deluxe, custom_mode]
+        game_mode_list = [connect4, connect3, wide_boi, tall_boi, tic_tac_toe, cheese_crackers, deluxe]
 
         base_height = game_screen.height * 0.18
         height_multiplier = 1
