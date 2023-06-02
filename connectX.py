@@ -1513,6 +1513,50 @@ def enemy_turn():
                         except IndexError:
                             pass
 
+                        # Method 6: Checking rows for inner chain fills
+                        try:
+
+                            mid_spaces = []
+
+                            if grid_manager.grid[y][x + (goal_num - 1)].value == symbol:
+
+                                current_col = x + (goal_num - 1)
+
+                                while current_col > x:
+
+                                    if grid_manager.grid[y][current_col].value == symbol:
+                                        pass
+
+                                    elif grid_manager.grid[y][current_col].value and \
+                                            grid_manager.grid[y][current_col].value != symbol:
+                                        mid_spaces = []
+                                        break
+
+                                    elif not grid_manager.grid[y][current_col].value:
+                                        mid_spaces.append(grid_manager.grid[y][current_col])
+
+                                    current_col -= 1
+
+                                if len(mid_spaces) == 1:
+                                    fail_roll = random.randint(1, 100)
+                                    if fail_roll > GameHandler.difficulty:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (Row fill)")
+                                            winning_moves.append(mid_spaces[0])
+                                        elif symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (Row fill)")
+                                            defensive_moves.append(mid_spaces[0])
+
+                                elif len(mid_spaces) >= 2:
+                                    for fill_cell in mid_spaces:
+                                        fail_roll = random.randint(1, 100)
+                                        if fail_roll > GameHandler.difficulty:
+                                            print("Found constructive move? (Row fill)")
+                                            constructive_moves.append(fill_cell)
+
+                        except IndexError:
+                            pass
+
         # Last advanced method: Finding moves that allow the enemy to build off a single square
         for row_ind, row in enumerate(grid_manager.grid):
             for col_ind, cell in enumerate(row):
