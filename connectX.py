@@ -21,49 +21,6 @@ music_object = music.MusicSettings()
 music_object.randomize_song()
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Save game utility functions
-
-
-def var_save_value(file, key_name, fallback):
-    # Use this for plain variables, just a dumb system that handles errors
-    while True:
-        try:
-            return file[key_name]
-        except KeyError:
-            print(f"SAVE file or key does not exist. Setting value to {fallback}")
-            return fallback
-
-
-def obtain_save_value(file, obj):
-    # Determines via the persistent data saved to shelve file what a given Stat object's saved value is
-
-    # Maybe we could save custom game modes using this?
-    if type(obj).__name__ == "Stat":
-        while True:
-            try:
-                return file[obj.name]
-            except KeyError:
-                print(f"SAVE file or key does not exist. Setting value to 0 (default)")
-                return 0
-
-    if type(obj).__name__ == "Replay":
-        while True:
-            try:
-                return file[obj.id]
-            except KeyError:
-                print(f"SAVE file or key does not exist. Setting replay values to defaults.")
-                return Replay(obj.id, "Replay", tic_tac_toe, [], [], True, "X", "O")
-
-    if type(obj).__name__ == "GameMode":
-        while True:
-            try:
-                return file["custom_mode"]
-            except KeyError:
-                print(f"SAVE file or key does not exist. Setting custom mode values to defaults.")
-                return GameMode("Custom", np.full((99, 99), "-"), 99)
-
-
 class GameScreen:
     width = 1080
     height = 720
@@ -266,9 +223,14 @@ class ReplayManager:
 
 class DataTracker:
 
-    wins = Stat("Wins", 0)
-    losses = Stat("Losses", 0)
-    ties = Stat("Ties", 0)
+    try:
+        wins = save_file["Wins"]
+        losses = save_file["Losses"]
+        ties = save_file["Ties"]
+    except KeyError:
+        wins = Stat("Wins", 0)
+        losses = Stat("Losses", 0)
+        ties = Stat("Ties", 0)
 
     # These two lists will track the list of all moves the player and CPU make, to be pushed if a replay is saved
     player_move_list: list = []
@@ -284,8 +246,8 @@ class GameHandler:
 
     difficulty: int = 0  # Setting a CPU difficulty level variable
 
-    player_symbol: str = var_save_value(save_file, "player_symbol", "X")
-    enemy_symbol: str = var_save_value(save_file, "enemy_symbol", "O")
+    player_symbol: str = "X"
+    enemy_symbol: str = "O"
 
     priority: bool = True  # Who goes/went first in a given game
     player_turn = True
@@ -656,16 +618,21 @@ def symbol_selection():
 
 def save_settings():
 
-    header_message = "Save Settings"
-
-    greeting = "Go Away"
-
     while True:
 
         game_screen.screen.fill((85, 165, 180))
 
-        create_onscreen_text(large_font, black, header_message, game_screen.width / 2, game_screen.height * 0.05, True)
-        create_onscreen_text(large_font, black, greeting, game_screen.width / 2, game_screen.height * 0.20, True)
+        create_onscreen_text(large_font, black, "Save Menu", game_screen.width / 2, game_screen.height * 0.05, True)
+
+        save_button = create_text_button(intermediate_font, black, "Save Progress", game_screen.width / 2,
+                                         game_screen.height * 0.25, slategray, lightgray, True, False)
+
+        if save_button:
+            confirm_sound = mixer.Sound("audio/win.wav")
+            mixer.Sound.play(confirm_sound)
+            save_file["Wins"] = DataTracker.wins
+            save_file["Losses"] = DataTracker.losses
+            save_file["Ties"] = DataTracker.ties
 
         return_button = create_text_button(medium_font, black, "main menu", game_screen.width / 2,
                                            game_screen.height * 0.5, slategray, lightgray, True)

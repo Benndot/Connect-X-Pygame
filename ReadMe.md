@@ -74,7 +74,7 @@ decides to claim a square inside two bounds of what could become a chain for the
  
 ### TODO
 
-implement basic save file (shelve) features
+Implement replay saving to save file
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
 first on their first turn.
