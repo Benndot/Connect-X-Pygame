@@ -1126,7 +1126,7 @@ class GridManager:
             y_offset_factor += GameHandler.current_mode.y_offset_step
 
         if not self.grid:
-            print("GameHandler grid is currently empty. Populating...")
+            print("The game grid is currently empty. Building...")
             self.grid = grid
 
     def generate_replay_grid(self, replay):
@@ -1557,6 +1557,52 @@ def enemy_turn():
                         except IndexError:
                             pass
 
+                        # Method 7: Descending diagonals
+                        try:
+
+                            mid_spaces = []
+
+                            if grid_manager.grid[y + (goal_num - 1)][x + (goal_num - 1)].value == symbol:
+
+                                row_coord = y + (goal_num - 2)
+                                col_coord = x + (goal_num - 2)
+
+                                while col_coord > x and row_coord > y:
+
+                                    if grid_manager.grid[row_coord][col_coord].value == symbol:
+                                        pass
+
+                                    elif grid_manager.grid[row_coord][col_coord].value and \
+                                            grid_manager.grid[row_coord][col_coord].value != symbol:
+                                        mid_spaces = []
+                                        break
+
+                                    elif not grid_manager.grid[row_coord][col_coord].value:
+                                        mid_spaces.append(grid_manager.grid[row_coord][col_coord])
+
+                                    row_coord -= 1
+                                    col_coord -= 1
+
+                                if len(mid_spaces) == 1:
+                                    fail_roll = random.randint(1, 100)
+                                    if fail_roll > GameHandler.difficulty:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (Desc. Diagonal fill)")
+                                            winning_moves.append(mid_spaces[0])
+                                        elif symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (Desc. Diagonal fill)")
+                                            defensive_moves.append(mid_spaces[0])
+
+                                elif len(mid_spaces) >= 2:
+                                    for fill_cell in mid_spaces:
+                                        fail_roll = random.randint(1, 100)
+                                        if fail_roll > GameHandler.difficulty:
+                                            print("Found constructive move? (Desc. Diagonal fill)")
+                                            constructive_moves.append(fill_cell)
+
+                        except IndexError:
+                            pass
+
         # Last advanced method: Finding moves that allow the enemy to build off a single square
         for row_ind, row in enumerate(grid_manager.grid):
             for col_ind, cell in enumerate(row):
@@ -1627,7 +1673,7 @@ def tie_check():
         for cell in row:
             if not cell.value:
                 open_cells += 1
-    if open_cells == 0 and GameHandler == "ongoing":
+    if open_cells == 0 and GameHandler.game_status == "ongoing":
         print("There are no more available squares and no one has won. The game ends in a tie!")
         GameHandler.game_status = "tied"
         return
