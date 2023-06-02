@@ -73,7 +73,7 @@ order to work towards that goal.
 
 implement basic save file (shelve) features
 
-Keep building CPU behaviour: inner-chain fills
+Keep building CPU behaviour: inner-chain fills (Rows, asc. diagonals, desc. diagonals)
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
 first on their first turn.

@@ -1079,8 +1079,11 @@ class GridCell:  # Currently generated inside the GridManager.generate_and_blit_
                 mixer.Sound.play(hover_sound)
                 self.is_hovered = True
             for evnt in pygame.event.get():
-                if evnt.type == pygame.MOUSEBUTTONUP:  # Detecting clicks
+                if evnt.type == pygame.MOUSEBUTTONUP and not self.value:  # Detecting clicks
                     return x, y, self.width, self.height
+                elif evnt.type == pygame.MOUSEBUTTONUP and self.value:
+                    rejection_sound = mixer.Sound('audio/rejection.wav')
+                    mixer.Sound.play(rejection_sound)
         elif x + self.width > mouse[0] > x and y + self.height > mouse[1] > y and GameHandler.player_turn == False:
             pygame.draw.rect(game_screen.screen, red, outline_rect, int(game_screen.height / 360))
             if not self.is_hovered:
@@ -1454,6 +1457,61 @@ def enemy_turn():
 
                             else:
                                 break
+
+            # Setup for fill-chain methods
+            for r_ind, row in enumerate(grid_manager.grid):
+                for c_ind, cell in enumerate(row):
+
+                    y = r_ind
+                    x = c_ind
+
+                    if grid_manager.grid[y][x].value == symbol:
+
+                        # Method 5: Checking columns for inner-chain fills
+                        try:
+
+                            mid_spaces = []
+
+                            # Checking for where the other end of the chain would be
+                            if grid_manager.grid[y + (goal_num - 1)][x].value == symbol:
+
+                                current_row = y + (goal_num - 2)
+
+                                # Cycling from the end of the chain back towards the beginning
+                                while current_row > y:
+
+                                    if grid_manager.grid[current_row][x].value == symbol:
+                                        pass  # Ignore filled spaces
+
+                                    elif grid_manager.grid[current_row][x].value and \
+                                            grid_manager.grid[current_row][x].value != symbol:
+                                        mid_spaces = []
+                                        break  # Chains with mixed characters aren't relevant (not working properly yet)
+
+                                    elif not grid_manager.grid[current_row][x].value:
+                                        mid_spaces.append(grid_manager.grid[current_row][x])
+
+                                    current_row -= 1  # Cycle to the next cell up
+
+                                if len(mid_spaces) == 1:
+                                    fail_roll = random.randint(1, 100)
+                                    if fail_roll > GameHandler.difficulty:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (Column fill)")
+                                            winning_moves.append(mid_spaces[0])
+                                        elif symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (Column fill)")
+                                            defensive_moves.append(mid_spaces[0])
+
+                                elif len(mid_spaces) >= 2:
+                                    for fill_cell in mid_spaces:
+                                        fail_roll = random.randint(1, 100)
+                                        if fail_roll > GameHandler.difficulty:
+                                            print("Found constructive move? (column fill)")
+                                            constructive_moves.append(fill_cell)  # Might warrant a new type of move
+
+                        except IndexError:
+                            pass
 
         # Last advanced method: Finding moves that allow the enemy to build off a single square
         for row_ind, row in enumerate(grid_manager.grid):
