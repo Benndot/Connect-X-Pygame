@@ -80,6 +80,8 @@ first on their first turn.
 
 ### Ideas
 
+incorporate font sizes into game-mode adjustment options
+
 make window resizable
 
 highlight winning cells
