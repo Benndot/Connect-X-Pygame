@@ -27,8 +27,8 @@ the game.
 The game itself is your standard Tic-Tac-Toe / Connect X game. A grid is constructed, consisting of squares aligned in
 rows and columns. Squares change color when hovered over, white if it's the player's turn and red if it isn't, and all 
 actions on this grid have sound effects associated with them as well. Upon the user's click during their turn, a square 
-is filled with the user's symbol. The CPU for their part, randomly selects their own square during their turn. Win and 
-tie checks are then run to determine if either player has won. 
+is filled with the user's symbol. The CPU on their turn, has a variety of methods it uses to determine what move to
+make. Win and tie checks are then run to determine if either player has won. 
 
 If the win / tie check comes up positive, the user is brought to a post-game screen where the user can choose to save 
 a replay of their game, which they can replay in the replay menu accessible from the main menu. Resets are afterward
@@ -61,19 +61,20 @@ The CPU logic works on 5 tiers of potential moves:
 1. Winning: A move that will win it the game
 2. Defensive: A move that will block a potential winning move of the player's 
 3. Optimal: A move that will build on a chain of squares 2 or longer, but not long enough to win
-4. Constructive: A move that will build a chain 2 squares long based off a square they have already placed
+4. Constructive: Moves that build towards winning, but not as much as optimal moves
 5. Random: Decided through random selection
 
 Each tier has priority after the next. 
 
 An optimal move describes a move that won't win the CPU the game, but will build on two or more squares in a row in 
 order to work towards that goal. 
+
+A constructive move is one where either the CPU builds on a single one of their own squares to start a chain, or 
+decides to claim a square inside two bounds of what could become a chain for the player. 
  
 ### TODO
 
 implement basic save file (shelve) features
-
-Keep building CPU behaviour: inner-chain fills (asc. diagonals, desc. diagonals)
 
 Create a short pause between win/loss/tie move and the user being brought the post-game screen, pause for enemy going
 first on their first turn.

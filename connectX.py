@@ -1603,6 +1603,51 @@ def enemy_turn():
                         except IndexError:
                             pass
 
+                        # Method 8: Ascending diagonals
+                        try:
+                            mid_spaces = []
+
+                            if grid_manager.grid[y + (goal_num - 1)][x - (goal_num - 1)].value == symbol and \
+                                    x - (goal_num - 1) >= 0:
+
+                                col_coord = x - (goal_num - 2)
+                                row_coord = y + (goal_num - 2)
+
+                                while 0 <= col_coord < x and row_coord > y:
+
+                                    if grid_manager.grid[row_coord][col_coord].value == symbol:
+                                        pass
+
+                                    elif grid_manager.grid[row_coord][col_coord].value and \
+                                            grid_manager.grid[row_coord][col_coord].value != symbol:
+                                        mid_spaces = []
+                                        break
+                                    elif not grid_manager.grid[row_coord][col_coord].value:
+                                        mid_spaces.append(grid_manager.grid[row_coord][col_coord])
+
+                                    row_coord -= 1
+                                    col_coord += 1
+
+                                if len(mid_spaces) == 1:
+                                    fail_roll = random.randint(1, 100)
+                                    if fail_roll > GameHandler.difficulty:
+                                        if symbol == GameHandler.enemy_symbol:
+                                            print("Winning move found (Asc. Diagonal fill)")
+                                            winning_moves.append(mid_spaces[0])
+                                        elif symbol == GameHandler.player_symbol:
+                                            print("Defensive move found (Asc. Diagonal fill)")
+                                            defensive_moves.append(mid_spaces[0])
+
+                                elif len(mid_spaces) >= 2:
+                                    for fill_cell in mid_spaces:
+                                        fail_roll = random.randint(1, 100)
+                                        if fail_roll > GameHandler.difficulty:
+                                            print("Found constructive move? (Asc. Diagonal fill)")
+                                            constructive_moves.append(fill_cell)
+
+                        except IndexError:
+                            pass
+
         # Last advanced method: Finding moves that allow the enemy to build off a single square
         for row_ind, row in enumerate(grid_manager.grid):
             for col_ind, cell in enumerate(row):
