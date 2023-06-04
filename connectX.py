@@ -317,8 +317,6 @@ def title_screen():
 
 def main_menu():
 
-    greeting_message = "Main Menu"
-
     play_game_str = {"Play": mode_selection}
     change_symbol_str = {"Change Symbol": symbol_selection}
     stats_replays_str = {"Replays": replays_menu}
@@ -332,7 +330,7 @@ def main_menu():
 
         game_screen.screen.fill((230, 60, 160))
 
-        create_onscreen_text(large_font, black, greeting_message, game_screen.width / 2, game_screen.height * 0.05,
+        create_onscreen_text(large_font, black, "Main Menu", game_screen.width / 2, game_screen.height * 0.05,
                              True)
 
         create_onscreen_text(medium_font, black, f"Wins: {DataTracker.wins.value}", game_screen.width / 15,
@@ -351,6 +349,23 @@ def main_menu():
                 option.get(list(option.keys())[0])()
 
             height_multiplier += 0.4
+
+        create_onscreen_text(medium_font, black, "Difficulty Level", game_screen.width / 1.3,
+                             game_screen.height * 0.3, False)
+
+        difficulty_values: list[int] = [66, 33, 0]
+        difficulty_titles: list[str] = ["Easy", "Medium", "Hard"]
+        base_height = game_screen.height * 0.4
+        dif_height_multiplier = 1
+        for index, difficulty in enumerate(difficulty_values):
+            difficulty_button = create_text_button(medium_font, black, difficulty_titles[index],
+                                                   game_screen.width / 1.25, base_height * dif_height_multiplier,
+                                                   lighter_green, green, False)
+
+            if difficulty_button:
+                GameHandler.difficulty = difficulty_values[index]
+
+            dif_height_multiplier += 0.3
 
         for evnt in pygame.event.get():
             if evnt.type == pygame.QUIT:
@@ -722,6 +737,9 @@ def mode_selection():
     while True:
         game_screen.screen.fill((100, 200, 200))
 
+        create_onscreen_text(intermediate_font, black, "Select A Mode", game_screen.width / 2,
+                             game_screen.height / 25, True)
+
         game_mode_list = [connect4, connect3, wide_boi, tall_boi, tic_tac_toe, cheese_crackers, deluxe]
 
         base_height = game_screen.height * 0.18
@@ -737,13 +755,13 @@ def mode_selection():
 
             height_multiplier += 0.5
 
-        back_button = create_text_button(medium_font, black, "Back", game_screen.width * .8,
-                                         game_screen.height * 0.02, (250, 0, 0), (180, 0, 0), True)
+        back_button = create_text_button(medium_font, black, "Back", game_screen.width * .73,
+                                         game_screen.height * 0.8, (250, 0, 0), (180, 0, 0), True)
         if back_button:
             main_menu()
 
-        music_button = create_text_button(small_font, blackish, "Toggle Music", game_screen.width * .925,
-                                          game_screen.height * 0.035, lightgray, slategray, True)
+        music_button = create_text_button(sml_med_font, blackish, "Toggle Music", game_screen.width * .88,
+                                          game_screen.height * 0.81, lightgray, slategray, True)
 
         if music_button:
             music_object.music_toggle()
